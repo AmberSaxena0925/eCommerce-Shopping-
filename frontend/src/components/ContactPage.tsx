@@ -216,7 +216,7 @@ export default function ContactPage({ onBack }: ContactPageProps) {
                     VISIT US
                   </h3>
                   <p className="text-zinc-400">
-                    Sai Naman pearls
+                    Sai Naman Pearls
                     <br />
                     maitrivanam Ameerpet
                     <br />
@@ -228,7 +228,7 @@ export default function ContactPage({ onBack }: ContactPageProps) {
 
             <div className="bg-zinc-950 border border-zinc-800 p-8">
               <h3 className="text-2xl font-light tracking-wider text-white mb-4">
-                BOUTIQUE HOURS
+                VISITING HOURS
               </h3>
               <div className="space-y-2 text-zinc-400">
                 <div className="flex justify-between">
