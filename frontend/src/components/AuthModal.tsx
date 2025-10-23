@@ -1,16 +1,17 @@
 import { useState } from 'react';
-import { X, Mail, Lock, User } from 'lucide-react';
+import { X, Mail, Lock, UserIcon } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
   initialMode?: 'login' | 'signup';
-  onAuthSuccess?: (user: any) => void;
 }
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:5001';
 
-export default function AuthModal({ isOpen, onClose, initialMode = 'login', onAuthSuccess }: AuthModalProps) {
+export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: AuthModalProps) {
+  const { setAuth } = useAuth(); // context for auth state
   const [mode, setMode] = useState<'login' | 'signup'>(initialMode);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -33,44 +34,28 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login', onAu
     setSuccess('');
 
     try {
-      if (mode === 'signup') {
-        const res = await fetch(`${API_BASE}/api/auth/signup`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name: formData.name, email: formData.email, password: formData.password }),
-        });
-        const json = await res.json();
-        if (!res.ok) throw new Error(json.message || 'Signup failed');
+      const url = `${API_BASE}/api/auth/${mode}`;
+      const body =
+        mode === 'signup'
+          ? { name: formData.name, email: formData.email, password: formData.password }
+          : { email: formData.email, password: formData.password };
 
-        // store token and notify parent
-        if (json.token) localStorage.setItem('token', json.token);
-        setSuccess('Account created & logged in successfully!');
-        setTimeout(() => {
-          setMode('login');
-          setSuccess('');
-        }, 1200);
-        if (onAuthSuccess && json.user) onAuthSuccess(json.user);
-        // close modal after short delay
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.message || 'Auth failed');
+
+      if (json.token && json.user) {
+        setAuth(json.user, json.token); // store in context & localStorage
+        setSuccess(mode === 'login' ? 'Login successful!' : 'Account created & logged in!');
         setTimeout(() => {
           onClose();
           setFormData({ email: '', password: '', name: '' });
-        }, 1500);
-      } else {
-        const res = await fetch(`${API_BASE}/api/auth/login`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: formData.email, password: formData.password }),
-        });
-        const json = await res.json();
-        if (!res.ok) throw new Error(json.message || 'Login failed');
-
-        if (json.token) localStorage.setItem('token', json.token);
-        setSuccess('Login successful!');
-        if (onAuthSuccess && json.user) onAuthSuccess(json.user);
-        setTimeout(() => {
-          onClose();
-          setFormData({ email: '', password: '', name: '' });
-        }, 800);
+        }, 1000);
       }
     } catch (err: any) {
       setError(err.message || 'An error occurred');
@@ -94,34 +79,20 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login', onAu
             <h2 className="text-3xl font-light tracking-widest text-white">
               {mode === 'login' ? 'LOGIN' : 'SIGN UP'}
             </h2>
-            <button
-              onClick={onClose}
-              className="text-zinc-400 hover:text-white transition-colors"
-            >
+            <button onClick={onClose} className="text-zinc-400 hover:text-white transition-colors">
               <X className="w-6 h-6" />
             </button>
           </div>
 
-          {error && (
-            <div className="bg-red-900/20 border border-red-900 text-red-400 px-4 py-3 mb-6 text-sm">
-              {error}
-            </div>
-          )}
-
-          {success && (
-            <div className="bg-green-900/20 border border-green-900 text-green-400 px-4 py-3 mb-6 text-sm">
-              {success}
-            </div>
-          )}
+          {error && <div className="bg-red-900/20 border border-red-900 text-red-400 px-4 py-3 mb-6 text-sm">{error}</div>}
+          {success && <div className="bg-green-900/20 border border-green-900 text-green-400 px-4 py-3 mb-6 text-sm">{success}</div>}
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {mode === 'signup' && (
               <div>
-                <label className="block text-zinc-400 text-sm mb-2 tracking-wider">
-                  FULL NAME
-                </label>
+                <label className="block text-zinc-400 text-sm mb-2 tracking-wider">FULL NAME</label>
                 <div className="relative">
-                  <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-600" />
+                  <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-600" />
                   <input
                     type="text"
                     name="name"
@@ -136,9 +107,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login', onAu
             )}
 
             <div>
-              <label className="block text-zinc-400 text-sm mb-2 tracking-wider">
-                EMAIL
-              </label>
+              <label className="block text-zinc-400 text-sm mb-2 tracking-wider">EMAIL</label>
               <div className="relative">
                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-600" />
                 <input
@@ -154,9 +123,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login', onAu
             </div>
 
             <div>
-              <label className="block text-zinc-400 text-sm mb-2 tracking-wider">
-                PASSWORD
-              </label>
+              <label className="block text-zinc-400 text-sm mb-2 tracking-wider">PASSWORD</label>
               <div className="relative">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-600" />
                 <input
@@ -190,9 +157,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login', onAu
               }}
               className="text-zinc-400 hover:text-white transition-colors text-sm tracking-wide"
             >
-              {mode === 'login'
-                ? "Don't have an account? Sign up"
-                : 'Already have an account? Login'}
+              {mode === 'login' ? "Don't have an account? Sign up" : 'Already have an account? Login'}
             </button>
           </div>
         </div>

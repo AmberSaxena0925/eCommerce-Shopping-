@@ -13,6 +13,9 @@ app.use(express.json());
 // routes
 const authRoutes = require('./routes/auth');
 app.use('/api/auth', authRoutes);
+// contact route
+const contactRoutes = require('./routes/contact');
+app.use('/api/contact', contactRoutes);
 
 // basic health
 app.get('/api/health', (req, res) => res.json({ ok: true }));

@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { Mail, Phone, MapPin, Send, Check } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
+const BACKEND_URL = (import.meta.env.VITE_BACKEND_URL as string) || 'http://localhost:5001';
+
 interface ContactPageProps {
   onBack: () => void;
 }
@@ -36,6 +38,23 @@ export default function ContactPage({ onBack }: ContactPageProps) {
       });
 
       if (error) throw error;
+
+      // send to backend so it can email you via nodemailer
+      try {
+        await fetch(`${BACKEND_URL}/api/contact`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: formData.name,
+            email: formData.email,
+            subject: formData.subject,
+            message: formData.message,
+          }),
+        });
+      } catch (mailErr) {
+        // don't fail the whole flow if email sending fails; log it and continue
+        console.error('Failed to call contact API:', mailErr);
+      }
 
       setSubmitted(true);
       setFormData({ name: '', email: '', subject: '', message: '' });

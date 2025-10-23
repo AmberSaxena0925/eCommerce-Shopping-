@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import FeaturedCollections from './components/FeaturedCollections';
@@ -13,42 +13,18 @@ import ProductDetailPage from './components/ProductDetailPage';
 import ContactPage from './components/ContactPage';
 import ProductsPage from './components/ProductsPage';
 import { Product } from './lib/supabase';
+import { useAuth } from './context/AuthContext';
 
 type View = 'home' | 'checkout' | 'confirmation' | 'product' | 'contact' | 'products';
 
 function App() {
+  const { user, loading: authLoading, logout } = useAuth();
   const [cartItems, setCartItems] = useState<Product[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [currentView, setCurrentView] = useState<View>('home');
   const [orderId, setOrderId] = useState<string>('');
   const [selectedProductSlug, setSelectedProductSlug] = useState<string>('');
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [user, setUser] = useState<any>(null);
-
-  useEffect(() => {
-    // initialize from backend JWT stored in localStorage
-    const token = localStorage.getItem('token');
-    const init = async () => {
-      if (!token) return setUser(null);
-      try {
-        const base = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:5001';
-        const res = await fetch(`${base}/api/auth/me`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!res.ok) {
-          localStorage.removeItem('token');
-          return setUser(null);
-        }
-        const json = await res.json();
-        setUser(json.user ?? null);
-      } catch (err) {
-        console.error('auth init error', err);
-        localStorage.removeItem('token');
-        setUser(null);
-      }
-    };
-    init();
-  }, []);
 
   const handleAddToCart = (product: Product) => {
     setCartItems((prev) => [...prev, product]);
@@ -153,16 +129,12 @@ function App() {
         onContactClick={() => setCurrentView('contact')}
         onProductsClick={() => setCurrentView('products')}
         user={user}
-        onLogout={async () => {
-          // clear token and local user state
-          localStorage.removeItem('token');
-          setUser(null);
-        }}
+        onLogout={logout}
       />
       <AuthModal
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
-        onAuthSuccess={(u) => setUser(u)}
+        onAuthSuccess={() => setIsAuthModalOpen(false)}
       />
       <CartSidebar
         isOpen={isCartOpen}
