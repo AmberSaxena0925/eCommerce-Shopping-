@@ -64,6 +64,13 @@ export default function ContactPage({ onBack }: ContactPageProps) {
           </p>
         </div>
 
+            <button
+              onClick={onBack}
+              className="text-zinc-400 hover:text-white transition-colors mb-6 tracking-wider"
+            >
+              ← BACK TO HOME
+            </button>
+
         <div className="grid lg:grid-cols-2 gap-12">
           <div className="space-y-8">
             <div className="bg-zinc-950 border border-zinc-800 p-8">
@@ -90,7 +97,7 @@ export default function ContactPage({ onBack }: ContactPageProps) {
                     onChange={handleChange}
                     required
                     className="w-full bg-black border border-zinc-800 px-4 py-3 text-white focus:border-white focus:outline-none transition-colors"
-                    placeholder="John Doe"
+                    placeholder="Your Full Name"
                   />
                 </div>
 
@@ -149,13 +156,6 @@ export default function ContactPage({ onBack }: ContactPageProps) {
                 </button>
               </form>
             </div>
-
-            <button
-              onClick={onBack}
-              className="text-zinc-400 hover:text-white transition-colors tracking-wider"
-            >
-              ← BACK TO HOME
-            </button>
           </div>
 
           <div className="space-y-6">
@@ -169,7 +169,7 @@ export default function ContactPage({ onBack }: ContactPageProps) {
                     EMAIL US
                   </h3>
                   <p className="text-zinc-400">support@noir.com</p>
-                  <p className="text-zinc-400">sales@noir.com</p>
+                  <p className="text-zinc-400">sainamanpearls1@gmail.com</p>
                 </div>
               </div>
 
@@ -181,7 +181,7 @@ export default function ContactPage({ onBack }: ContactPageProps) {
                   <h3 className="text-white font-light tracking-wider mb-2">
                     CALL US
                   </h3>
-                  <p className="text-zinc-400">+1 (555) 123-4567</p>
+                  <p className="text-zinc-400">+91 984-947-2755</p>
                   <p className="text-zinc-500 text-sm mt-1">
                     Mon-Fri: 9AM - 6PM EST
                   </p>
@@ -197,11 +197,11 @@ export default function ContactPage({ onBack }: ContactPageProps) {
                     VISIT US
                   </h3>
                   <p className="text-zinc-400">
-                    123 Luxury Avenue
+                    Sai Naman pearls
                     <br />
-                    Fifth Floor
+                    maitrivanam Ameerpet
                     <br />
-                    New York, NY 10001
+                    Hyderabad 500016, India.
                   </p>
                 </div>
               </div>
