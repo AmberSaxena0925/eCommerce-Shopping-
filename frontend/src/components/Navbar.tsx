@@ -53,7 +53,10 @@ export default function Navbar({ cartCount, onCartClick, onAuthClick, onContactC
           <div className="flex items-center space-x-6">
             {user ? (
               <div className="hidden md:flex items-center space-x-4">
-                <span className="text-zinc-400 text-sm">{user.email}</span>
+                <div className="flex items-center space-x-2">
+                  <User className="w-5 h-5 text-zinc-400" />
+                  <span className="text-zinc-400 text-sm font-medium">{user.name}</span>
+                </div>
                 <button
                   onClick={onLogout}
                   className="text-zinc-400 hover:text-white transition-colors"
