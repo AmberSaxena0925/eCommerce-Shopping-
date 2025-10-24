@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import FeaturedCollections from './components/FeaturedCollections';
@@ -12,19 +12,34 @@ import AuthModal from './components/AuthModal';
 import ProductDetailPage from './components/ProductDetailPage';
 import ContactPage from './components/ContactPage';
 import ProductsPage from './components/ProductsPage';
-import { Product } from './lib/supabase';
-import { useAuth } from './context/AuthContext';
+import LoadingScreen from './components/Loadingscreen';
+import { Product, supabase } from './lib/supabase';
 
 type View = 'home' | 'checkout' | 'confirmation' | 'product' | 'contact' | 'products';
 
 function App() {
-  const { user, loading: authLoading, logout } = useAuth();
+  const [isLoading, setIsLoading] = useState(true);
   const [cartItems, setCartItems] = useState<Product[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [currentView, setCurrentView] = useState<View>('home');
   const [orderId, setOrderId] = useState<string>('');
   const [selectedProductSlug, setSelectedProductSlug] = useState<string>('');
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [user, setUser] = useState<import('@supabase/supabase-js').User | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }: { data: { session: import('@supabase/supabase-js').Session | null } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event: string, session: import('@supabase/supabase-js').Session | null) => {
+        setUser(session?.user ?? null);
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const handleAddToCart = (product: Product) => {
     setCartItems((prev) => [...prev, product]);
@@ -77,6 +92,10 @@ function App() {
     window.scrollTo(0, 0);
   };
 
+  if (isLoading) {
+    return <LoadingScreen onComplete={() => setIsLoading(false)} />;
+  }
+
   if (currentView === 'checkout') {
     return (
       <CheckoutPage
@@ -125,16 +144,18 @@ function App() {
       <Navbar
         cartCount={cartItems.length}
         onCartClick={() => setIsCartOpen(true)}
-  onAuthClick={() => setIsAuthModalOpen(true)}
+        onAuthClick={() => setIsAuthModalOpen(true)}
         onContactClick={() => setCurrentView('contact')}
         onProductsClick={() => setCurrentView('products')}
         user={user}
-        onLogout={logout}
+        onLogout={async () => {
+          await supabase.auth.signOut();
+          setUser(null);
+        }}
       />
       <AuthModal
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
-        onAuthSuccess={() => setIsAuthModalOpen(false)}
       />
       <CartSidebar
         isOpen={isCartOpen}

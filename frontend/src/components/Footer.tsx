@@ -11,10 +11,11 @@ export default function Footer({ onContactClick }: FooterProps) {
         <div className="grid md:grid-cols-4 gap-12 mb-12">
           <div>
             <h3 className="text-2xl font-light tracking-widest text-white mb-6">
-              NOIR
+              SAI NAMAN PEARLS
             </h3>
             <p className="text-zinc-500 text-sm leading-relaxed">
-              Timeless elegance crafted to perfection.
+              Discover the elegance of handcrafted pearls with Sai Naman Pearls.
+              Each piece tells a story of timeless beauty and exquisite craftsmanship.
             </p>
           </div>
 

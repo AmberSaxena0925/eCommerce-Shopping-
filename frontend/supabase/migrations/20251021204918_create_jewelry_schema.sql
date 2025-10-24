@@ -94,14 +94,6 @@ CREATE POLICY "Anyone can view products"
   ON products FOR SELECT
   USING (true);
 
--- Insert sample data
-INSERT INTO categories (name, slug, description, image_url) VALUES
-  ('Rings', 'rings', 'Exquisite rings crafted with precision', 'https://images.pexels.com/photos/1232931/pexels-photo-1232931.jpeg'),
-  ('Necklaces', 'necklaces', 'Elegant necklaces for every occasion', 'https://images.pexels.com/photos/1454171/pexels-photo-1454171.jpeg'),
-  ('Earrings', 'earrings', 'Stunning earrings that captivate', 'https://images.pexels.com/photos/1454172/pexels-photo-1454172.jpeg'),
-  ('Bracelets', 'bracelets', 'Timeless bracelets of distinction', 'https://images.pexels.com/photos/1472443/pexels-photo-1472443.jpeg')
-ON CONFLICT (slug) DO NOTHING;
-
 INSERT INTO collections (name, slug, description, featured, image_url) VALUES
   ('Noir Collection', 'noir', 'Mysterious elegance in black diamonds and dark metals', true, 'https://images.pexels.com/photos/1457842/pexels-photo-1457842.jpeg'),
   ('Eternal Shine', 'eternal-shine', 'Classic pieces that transcend time', true, 'https://images.pexels.com/photos/1454171/pexels-photo-1454171.jpeg')
@@ -109,18 +101,17 @@ ON CONFLICT (slug) DO NOTHING;
 
 INSERT INTO products (name, slug, description, price, category_id, collection_id, images, materials, featured, in_stock)
 SELECT 
-  'Midnight Diamond Ring',
-  'midnight-diamond-ring',
-  'A stunning black diamond set in 18k white gold, embodying sophistication and mystery.',
-  2499.00,
+  'Celestial Drop',
+  'Celestial Drop',
+  "Experience a cascade of refined luxury. These captivating earrings are meticulously crafted, featuring a gracefully sculpted heart that flows seamlessly into a brilliant, bezel-set solitaire. This fiery crystal acts as the perfect, sparkling transition to the main event: a flawless, iridescent pearl drop. The pearl's organic, creamy glow provides a stunning contrast to the clean lines of the gold and the sharp sparkle of the crystal. This is a design of pure elegance, evoking a feeling of quiet confidence and sophisticated taste."",
+  749.00,
   c.id,
   col.id,
   '["https://images.pexels.com/photos/1232931/pexels-photo-1232931.jpeg", "https://images.pexels.com/photos/1454171/pexels-photo-1454171.jpeg"]'::jsonb,
-  ARRAY['18k White Gold', 'Black Diamond'],
   true,
   true
 FROM categories c, collections col
-WHERE c.slug = 'rings' AND col.slug = 'noir'
+WHERE c.slug = 'earing' AND col.slug = 'NP'
 ON CONFLICT (slug) DO NOTHING;
 
 INSERT INTO products (name, slug, description, price, category_id, images, materials, featured, in_stock)
