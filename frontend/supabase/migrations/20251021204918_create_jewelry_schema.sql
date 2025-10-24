@@ -111,7 +111,7 @@ SELECT
   true,
   true
 FROM categories c, collections col
-WHERE c.slug = 'earing' AND col.slug = 'NP'
+WHERE c.slug = 'earring' AND col.slug = 'NP'
 ON CONFLICT (slug) DO NOTHING;
 
 INSERT INTO products (name, slug, description, price, category_id, images, materials, featured, in_stock)
@@ -142,6 +142,34 @@ SELECT
   true
 FROM categories c
 WHERE c.slug = 'earrings'
+ON CONFLICT (slug) DO NOTHING;
+
+INSERT INTO products (name, slug, description, price, category_id, images, materials, in_stock)
+SELECT 
+  'Onyx Link Bracelet',
+  'onyx-link-bracelet',
+  'Bold yet refined, featuring alternating onyx stones and white gold links.',
+  1599.00,
+  c.id,
+  '["https://images.pexels.com/photos/1472443/pexels-photo-1472443.jpeg"]'::jsonb,
+  ARRAY['18k White Gold', 'Onyx'],
+  true
+FROM categories c
+WHERE c.slug = 'bracelets'
+ON CONFLICT (slug) DO NOTHING;
+
+INSERT INTO products (name, slug, description, price, category_id, images, materials, in_stock)
+SELECT 
+  'Onyx Link Bracelet',
+  'onyx-link-bracelet',
+  'Bold yet refined, featuring alternating onyx stones and white gold links.',
+  1599.00,
+  c.id,
+  '["https://images.pexels.com/photos/1472443/pexels-photo-1472443.jpeg"]'::jsonb,
+  ARRAY['18k White Gold', 'Onyx'],
+  true
+FROM categories c
+WHERE c.slug = 'bracelets'
 ON CONFLICT (slug) DO NOTHING;
 
 INSERT INTO products (name, slug, description, price, category_id, images, materials, in_stock)
