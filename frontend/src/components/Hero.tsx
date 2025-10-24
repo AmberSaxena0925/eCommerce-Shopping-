@@ -29,13 +29,13 @@ export default function Hero() {
         {/* ✅ Logo with glowing white background */}
         <div className="relative inline-block mx-auto mb-6 animate-slide-up">
           {/* glowing white background */}
-          <div className="absolute inset-0 bg-white/40 blur-2xl rounded-full animate-pulse-slow"></div>
+          {/* <div className="absolute inset-0 bg-white/20 blur-3xl rounded-full animate-pulse-slow"></div> */}
 
           {/* actual logo */}
           <img
-            src="/Logo.png"
+            src="/Logo2.png"
             alt="NOIR Logo"
-            className="relative mx-auto w-40 md:w-64 drop-shadow-[0_0_25px_rgba(255,255,255,0.5)]"
+            className="relative mx-auto w-40 md:w-80 "
           />
         </div>
 
