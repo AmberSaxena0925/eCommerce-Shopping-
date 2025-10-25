@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ArrowLeft, CreditCard, Package, Check } from 'lucide-react';
-import { Product, supabase } from '../lib/supabase';
+import { Product } from '../types';
 
 interface CartItem extends Product {
   quantity: number;
@@ -56,40 +56,34 @@ export default function CheckoutPage({
     setIsSubmitting(true);
 
     try {
-      const { data: order, error: orderError } = await supabase
-        .from('orders')
-        .insert({
-          customer_name: formData.customerName,
-          customer_email: formData.customerEmail,
-          customer_phone: formData.customerPhone,
-          shipping_address: formData.shippingAddress,
-          city: formData.city,
-          postal_code: formData.postalCode,
-          country: formData.country,
-          total_amount: total,
-          status: 'pending',
-        })
-        .select()
-        .single();
+      const body = {
+        customerName: formData.customerName,
+        customerEmail: formData.customerEmail,
+        customerPhone: formData.customerPhone,
+        shippingAddress: formData.shippingAddress,
+        city: formData.city,
+        postalCode: formData.postalCode,
+        country: formData.country,
+        totalAmount: total,
+        items: cartItems.map((item) => ({
+          product_id: item.id,
+          product_name: item.name,
+          product_price: item.price,
+          quantity: item.quantity,
+          subtotal: item.price * item.quantity,
+        })),
+      };
 
-      if (orderError) throw orderError;
+      const res = await fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
 
-      const orderItems = cartItems.map((item) => ({
-        order_id: order.id,
-        product_id: item.id,
-        product_name: item.name,
-        product_price: item.price,
-        quantity: item.quantity,
-        subtotal: item.price * item.quantity,
-      }));
+      if (!res.ok) throw new Error('Failed to create order');
 
-      const { error: itemsError } = await supabase
-        .from('order_items')
-        .insert(orderItems);
-
-      if (itemsError) throw itemsError;
-
-      onOrderComplete(order.id);
+      const json = await res.json();
+      onOrderComplete(json.id);
     } catch (error) {
       console.error('Error creating order:', error);
       alert('Failed to create order. Please try again.');

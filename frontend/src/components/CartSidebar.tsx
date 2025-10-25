@@ -1,5 +1,5 @@
 import { X, Minus, Plus, ShoppingBag } from 'lucide-react';
-import { Product } from '../lib/supabase';
+import { Product } from '../types';
 
 interface CartItem extends Product {
   quantity: number;

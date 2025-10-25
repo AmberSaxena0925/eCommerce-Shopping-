@@ -1,6 +1,21 @@
 import { useEffect, useState } from 'react';
 import { ArrowLeft, ShoppingBag, Heart, Share2, Check } from 'lucide-react';
-import { supabase, Product } from '../lib/supabase';
+import { localProducts } from '../data/products'; 
+
+
+interface Product {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  price: number;
+  category_id?: string;
+  collection_id?: string;
+  images: string[];
+  materials: string[];
+  in_stock: boolean;
+  featured?: boolean;
+}
 
 interface ProductDetailPageProps {
   productSlug: string;
@@ -24,18 +39,34 @@ export default function ProductDetailPage({
     window.scrollTo(0, 0);
   }, [productSlug]);
 
-  const fetchProduct = async () => {
-    const { data, error } = await supabase
-      .from('products')
-      .select('*')
-      .eq('slug', productSlug)
-      .maybeSingle();
-
-    if (!error && data) {
-      setProduct(data);
+const fetchProduct = async () => {
+  setLoading(true);
+  try {
+    const res = await fetch(`/api/products/${encodeURIComponent(productSlug)}`);
+    if (!res.ok) {
+      console.warn('Backend product not found, checking local data...');
+      const local = localProducts.find(p => p.slug === productSlug);
+      setProduct(local || null);
+      return;
     }
+
+    const data = await res.json();
+    if (data) {
+      setProduct(data);
+    } else {
+      // If API returned empty, use local fallback
+      const local = localProducts.find(p => p.slug === productSlug);
+      setProduct(local || null);
+    }
+  } catch (err) {
+    console.error('Failed to load product from backend, checking local data...', err);
+    const local = localProducts.find(p => p.slug === productSlug);
+    setProduct(local || null);
+  } finally {
     setLoading(false);
-  };
+  }
+};
+
 
   const handleAddToCart = () => {
     if (!product) return;

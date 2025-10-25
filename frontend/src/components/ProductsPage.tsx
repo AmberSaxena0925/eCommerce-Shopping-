@@ -1,6 +1,23 @@
 import { useEffect, useState } from 'react';
-import { supabase, Product, Category } from '../lib/supabase';
 import { ShoppingBag, SlidersHorizontal, X } from 'lucide-react';
+import { localProducts } from '../data/products'; 
+
+
+interface Product {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  price: number;
+  images: string[];
+  materials: string[];
+  in_stock: boolean;
+}
+
+interface Category {
+  id: string;
+  name: string;
+}
 
 interface ProductsPageProps {
   onBack: () => void;
@@ -30,34 +47,56 @@ export default function ProductsPage({
   }, [selectedCategory]);
 
   const fetchCategories = async () => {
-    const { data, error } = await supabase
-      .from('categories')
-      .select('*')
-      .order('name', { ascending: true });
-
-    if (!error && data) {
-      setCategories(data);
+    try {
+      const res = await fetch('/api/categories');
+      const text = await res.text();
+      if (!res.ok) {
+        console.error('Failed to fetch /api/categories', res.status, text);
+        setCategories([]);
+      } else {
+        const data = text ? JSON.parse(text) : [];
+        setCategories(Array.isArray(data) ? data : []);
+      }
+    } catch (err) {
+      console.error('Failed to load categories', err);
     }
   };
 
-  const fetchProducts = async () => {
-    setLoading(true);
-    let query = supabase
-      .from('products')
-      .select('*')
-      .order('created_at', { ascending: false });
+const fetchProducts = async () => {
+  setLoading(true);
+  try {
+    const params = new URLSearchParams();
+    if (selectedCategory !== 'all') params.set('category_id', selectedCategory);
+    const res = await fetch(`/api/products?${params.toString()}`);
+    const text = await res.text();
 
+    let backendProducts: Product[] = [];
+    if (!res.ok) {
+      console.error('Failed to fetch /api/products', res.status, text);
+    } else {
+      const data = text ? JSON.parse(text) : [];
+      backendProducts = Array.isArray(data) ? data : [];
+    }
+
+    // ✅ Combine backend and local products
+    let combined = [...backendProducts, ...localProducts];
+
+    // ✅ If category filter is applied, filter local ones too
     if (selectedCategory !== 'all') {
-      query = query.eq('category_id', selectedCategory);
+      combined = combined.filter(
+        (p) => p.category_id === selectedCategory // only if you have a category_id in local products
+      );
     }
 
-    const { data, error } = await query;
-
-    if (!error && data) {
-      setProducts(data);
-    }
+    setProducts(combined);
+  } catch (err) {
+    console.error('Failed to load products', err);
+    setProducts(localProducts); // fallback to local
+  } finally {
     setLoading(false);
-  };
+  }
+};
+
 
   const handleCategoryClick = (categoryId: string) => {
     setSelectedCategory(categoryId);

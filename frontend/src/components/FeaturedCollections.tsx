@@ -1,6 +1,15 @@
 import { useEffect, useState } from 'react';
-import { supabase, Collection } from '../lib/supabase';
 import { ArrowRight } from 'lucide-react';
+import { localCollections } from '../data/collections'; // adjust path if needed
+
+interface Collection {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  image_url: string;
+  featured?: boolean;
+}
 
 export default function FeaturedCollections() {
   const [collections, setCollections] = useState<Collection[]>([]);
@@ -11,16 +20,37 @@ export default function FeaturedCollections() {
   }, []);
 
   const fetchCollections = async () => {
-    const { data, error } = await supabase
-      .from('collections')
-      .select('*')
-      .eq('featured', true)
-      .order('created_at', { ascending: false });
+    setLoading(true);
+    try {
+      const res = await fetch('/api/collections?featured=true');
+      const text = await res.text();
 
-    if (!error && data) {
-      setCollections(data);
+      let backendCollections: Collection[] = [];
+
+      if (!res.ok) {
+        console.error('Failed to fetch /api/collections', res.status, text);
+      } else {
+        const data = text ? JSON.parse(text) : [];
+        backendCollections = Array.isArray(data) ? data : [];
+      }
+
+      // ✅ Combine backend + local collections and remove duplicates by slug
+      const combined = [...backendCollections, ...localCollections].filter(
+        (c) => c.featured
+      );
+
+      const deduped = Array.from(
+        new Map(combined.map((c) => [c.slug, c])).values()
+      );
+
+      setCollections(deduped);
+    } catch (err) {
+      console.error('Failed to load collections', err);
+      // ✅ fallback to local collections if backend fails
+      setCollections(localCollections.filter((c) => c.featured));
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   if (loading) {

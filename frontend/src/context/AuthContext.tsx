@@ -52,6 +52,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       } catch (err) {
         console.error('Token verification failed:', err);
         logout(); // Clear invalid token
+      } finally {
+        setLoading(false);
       }
     };
 

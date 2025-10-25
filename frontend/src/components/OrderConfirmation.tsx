@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { CheckCircle, Package, Mail, Home } from 'lucide-react';
-import { supabase } from '../lib/supabase';
 
 interface OrderConfirmationProps {
   orderId: string;
@@ -41,26 +40,22 @@ export default function OrderConfirmation({
   }, [orderId]);
 
   const fetchOrderDetails = async () => {
-    const { data: orderData, error: orderError } = await supabase
-      .from('orders')
-      .select('*')
-      .eq('id', orderId)
-      .maybeSingle();
-
-    if (!orderError && orderData) {
-      setOrder(orderData);
+    try {
+      const res = await fetch(`/api/orders/${encodeURIComponent(orderId)}`);
+      if (!res.ok) {
+        setOrder(null);
+        setOrderItems([]);
+        setLoading(false);
+        return;
+      }
+      const json = await res.json();
+      setOrder(json.order ?? null);
+      setOrderItems(Array.isArray(json.items) ? json.items : []);
+    } catch (err) {
+      console.error('Failed to load order', err);
+    } finally {
+      setLoading(false);
     }
-
-    const { data: itemsData, error: itemsError } = await supabase
-      .from('order_items')
-      .select('*')
-      .eq('order_id', orderId);
-
-    if (!itemsError && itemsData) {
-      setOrderItems(itemsData);
-    }
-
-    setLoading(false);
   };
 
   if (loading) {

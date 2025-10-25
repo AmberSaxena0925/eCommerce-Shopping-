@@ -16,6 +16,11 @@ app.use('/api/auth', authRoutes);
 // contact route
 const contactRoutes = require('./routes/contact');
 app.use('/api/contact', contactRoutes);
+// content (products/categories/collections)
+const contentRoutes = require('./routes/content');
+app.use('/api', contentRoutes);
+const ordersRoutes = require('./routes/orders');
+app.use('/api', ordersRoutes);
 
 // basic health
 app.get('/api/health', (req, res) => res.json({ ok: true }));
@@ -39,4 +44,24 @@ async function start() {
 }
 
 start();
+
+// Fallback for unmatched routes (return JSON instead of HTML)
+app.use((req, res) => {
+	if (req.path.startsWith('/api')) {
+		return res.status(404).json({ message: 'API route not found' });
+	}
+	// For non-API paths, let frontend dev server handle SPA routes
+	res.status(404).send('Not found');
+});
+
+// Global error handler to ensure JSON responses for errors
+app.use((err, req, res, next) => {
+	console.error('Unhandled error:', err);
+	const status = err.status || 500;
+	// send JSON for API routes
+	if (req.path.startsWith('/api')) {
+		return res.status(status).json({ message: err.message || 'Server error' });
+	}
+	res.status(status).send(err.message || 'Server error');
+});
 

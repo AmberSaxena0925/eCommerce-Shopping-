@@ -44,7 +44,6 @@ CREATE TABLE IF NOT EXISTS categories (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   name text NOT NULL,
   slug text UNIQUE NOT NULL,
-  description text DEFAULT '',
   image_url text DEFAULT '',
   created_at timestamptz DEFAULT now()
 );
@@ -54,7 +53,6 @@ CREATE TABLE IF NOT EXISTS collections (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   name text NOT NULL,
   slug text UNIQUE NOT NULL,
-  description text DEFAULT '',
   image_url text DEFAULT '',
   featured boolean DEFAULT false,
   created_at timestamptz DEFAULT now()
@@ -65,7 +63,6 @@ CREATE TABLE IF NOT EXISTS products (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   name text NOT NULL,
   slug text UNIQUE NOT NULL,
-  description text DEFAULT '',
   price numeric NOT NULL DEFAULT 0,
   category_id uuid REFERENCES categories(id),
   collection_id uuid REFERENCES collections(id),
@@ -80,12 +77,14 @@ CREATE TABLE IF NOT EXISTS products (
 ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
 ALTER TABLE collections ENABLE ROW LEVEL SECURITY;
 ALTER TABLE products ENABLE ROW LEVEL SECURITY;
+  -- REMOVED: This migration was part of the old Supabase setup.
+  -- The project now uses MongoDB. The original SQL has been removed to avoid confusion.
+  -- If you need the original SQL, restore from version control history.
 
 -- Public read access policies
 CREATE POLICY "Anyone can view categories"
   ON categories FOR SELECT
   USING (true);
-
 CREATE POLICY "Anyone can view collections"
   ON collections FOR SELECT
   USING (true);

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import FeaturedCollections from './components/FeaturedCollections';
@@ -12,8 +12,9 @@ import AuthModal from './components/AuthModal';
 import ProductDetailPage from './components/ProductDetailPage';
 import ContactPage from './components/ContactPage';
 import ProductsPage from './components/ProductsPage';
-import LoadingScreen from './components/Loadingscreen';
-import { Product, supabase } from './lib/supabase';
+import LoadingScreen from './components/LoadingScreen';
+import { Product } from './types';
+import { useAuth } from './context/AuthContext';
 
 type View = 'home' | 'checkout' | 'confirmation' | 'product' | 'contact' | 'products';
 
@@ -25,21 +26,8 @@ function App() {
   const [orderId, setOrderId] = useState<string>('');
   const [selectedProductSlug, setSelectedProductSlug] = useState<string>('');
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [user, setUser] = useState<import('@supabase/supabase-js').User | null>(null);
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }: { data: { session: import('@supabase/supabase-js').Session | null } }) => {
-      setUser(session?.user ?? null);
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event: string, session: import('@supabase/supabase-js').Session | null) => {
-        setUser(session?.user ?? null);
-      }
-    );
-
-    return () => subscription.unsubscribe();
-  }, []);
+  const { user, logout } = useAuth();
+ 
 
   const handleAddToCart = (product: Product) => {
     setCartItems((prev) => [...prev, product]);
@@ -148,10 +136,7 @@ function App() {
         onContactClick={() => setCurrentView('contact')}
         onProductsClick={() => setCurrentView('products')}
         user={user}
-        onLogout={async () => {
-          await supabase.auth.signOut();
-          setUser(null);
-        }}
+        onLogout={logout}
       />
       <AuthModal
         isOpen={isAuthModalOpen}

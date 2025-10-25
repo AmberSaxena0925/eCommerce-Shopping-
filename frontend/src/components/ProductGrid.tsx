@@ -1,6 +1,18 @@
 import { useEffect, useState } from 'react';
-import { supabase, Product } from '../lib/supabase';
 import { ShoppingBag } from 'lucide-react';
+import { localProducts } from '../data/products'; // 👈 import your hardcoded products file
+
+interface Product {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  price: number;
+  images: string[];
+  materials: string[];
+  in_stock: boolean;
+  featured?: boolean;
+}
 
 interface ProductGridProps {
   onAddToCart: (product: Product) => void;
@@ -16,16 +28,34 @@ export default function ProductGrid({ onAddToCart, onViewProduct }: ProductGridP
   }, []);
 
   const fetchProducts = async () => {
-    const { data, error } = await supabase
-      .from('products')
-      .select('*')
-      .eq('featured', true)
-      .order('created_at', { ascending: false });
+    setLoading(true);
+    try {
+      const res = await fetch('/api/products?featured=true');
+      const text = await res.text();
 
-    if (!error && data) {
-      setProducts(data);
+      let backendProducts: Product[] = [];
+
+      if (!res.ok) {
+        console.error('Failed to fetch /api/products', res.status, text);
+      } else {
+        const data = text ? JSON.parse(text) : [];
+        backendProducts = Array.isArray(data) ? data : [];
+      }
+
+      // ✅ Combine backend + local hardcoded products
+      const combined = [...backendProducts, ...localProducts].filter((p) => p.featured);
+
+      // ✅ Remove duplicates based on slug (to prevent duplicates if same product exists in both)
+      const deduped = Array.from(new Map(combined.map((p) => [p.slug, p])).values());
+
+      setProducts(deduped);
+    } catch (err) {
+      console.error('Failed to load products', err);
+      // ✅ Fallback to local hardcoded ones if API fails
+      setProducts(localProducts.filter((p) => p.featured));
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   if (loading) {

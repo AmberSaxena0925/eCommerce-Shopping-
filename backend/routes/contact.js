@@ -53,6 +53,15 @@ router.post('/', async (req, res) => {
     const info = await transporter.sendMail(mailOptions);
     console.log('Contact email sent:', info && info.messageId);
 
+    // persist message to MongoDB if model exists
+    try {
+      const ContactMessage = require('../models/ContactMessage');
+      const doc = new ContactMessage({ name, email, subject, message, status: 'new' });
+      await doc.save();
+    } catch (e) {
+      console.warn('Could not save contact message to DB:', e.message || e);
+    }
+
     res.json({ ok: true, message: 'Email sent' });
   } catch (err) {
     console.error('Failed to send contact email', err);
