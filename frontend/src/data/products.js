@@ -20,6 +20,7 @@ export const localProducts = [
     materials: ['Silver'],
     in_stock: true,
     featured: true,
+    category: 'necklace',
   },
   {
     id: 'local-3',

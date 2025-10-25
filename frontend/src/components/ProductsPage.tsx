@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ShoppingBag, SlidersHorizontal, X } from 'lucide-react';
-import { localProducts } from '../data/products'; 
-
+import { localProducts } from '../data/products';
 
 interface Product {
   id: string;
@@ -12,12 +11,15 @@ interface Product {
   images: string[];
   materials: string[];
   in_stock: boolean;
+  category?: string;
 }
 
-interface Category {
-  id: string;
-  name: string;
-}
+const categories = [
+  { id: 'all', name: 'All' },
+  { id: 'necklace', name: 'Necklace' },
+  { id: 'bracelet', name: 'Bracelet' },
+  { id: 'earring', name: 'Earring' },
+];
 
 interface ProductsPageProps {
   onBack: () => void;
@@ -30,73 +32,56 @@ export default function ProductsPage({
   onViewProduct,
   onAddToCart,
 }: ProductsPageProps) {
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
 
   useEffect(() => {
-    fetchCategories();
     fetchProducts();
     window.scrollTo(0, 0);
   }, []);
 
   useEffect(() => {
-    fetchProducts();
+    applyCategoryFilter();
   }, [selectedCategory]);
 
-  const fetchCategories = async () => {
+  const fetchProducts = async () => {
+    setLoading(true);
     try {
-      const res = await fetch('/api/categories');
+      const res = await fetch('/api/products');
       const text = await res.text();
-      if (!res.ok) {
-        console.error('Failed to fetch /api/categories', res.status, text);
-        setCategories([]);
-      } else {
-        const data = text ? JSON.parse(text) : [];
-        setCategories(Array.isArray(data) ? data : []);
+
+      let backendProducts: Product[] = [];
+      if (res.ok && text) {
+        const data = JSON.parse(text);
+        backendProducts = Array.isArray(data) ? data : [];
       }
+
+      const combinedProducts = [...backendProducts, ...localProducts];
+      setAllProducts(combinedProducts);
+      setProducts(combinedProducts);
     } catch (err) {
-      console.error('Failed to load categories', err);
+      console.error('Failed to load products', err);
+      setAllProducts(localProducts);
+      setProducts(localProducts);
+    } finally {
+      setLoading(false);
     }
   };
 
-const fetchProducts = async () => {
-  setLoading(true);
-  try {
-    const params = new URLSearchParams();
-    if (selectedCategory !== 'all') params.set('category_id', selectedCategory);
-    const res = await fetch(`/api/products?${params.toString()}`);
-    const text = await res.text();
-
-    let backendProducts: Product[] = [];
-    if (!res.ok) {
-      console.error('Failed to fetch /api/products', res.status, text);
+  const applyCategoryFilter = () => {
+    if (selectedCategory === 'all') {
+      setProducts(allProducts);
     } else {
-      const data = text ? JSON.parse(text) : [];
-      backendProducts = Array.isArray(data) ? data : [];
-    }
-
-    // ✅ Combine backend and local products
-    let combined = [...backendProducts, ...localProducts];
-
-    // ✅ If category filter is applied, filter local ones too
-    if (selectedCategory !== 'all') {
-      combined = combined.filter(
-        (p) => p.category_id === selectedCategory // only if you have a category_id in local products
+      setProducts(
+        allProducts.filter(
+          (p) => p.category?.toLowerCase() === selectedCategory
+        )
       );
     }
-
-    setProducts(combined);
-  } catch (err) {
-    console.error('Failed to load products', err);
-    setProducts(localProducts); // fallback to local
-  } finally {
-    setLoading(false);
-  }
-};
-
+  };
 
   const handleCategoryClick = (categoryId: string) => {
     setSelectedCategory(categoryId);
@@ -106,6 +91,7 @@ const fetchProducts = async () => {
   return (
     <div className="min-h-screen bg-black py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
         <div className="mb-12 animate-fade-in">
           <button
             onClick={onBack}
@@ -129,16 +115,6 @@ const fetchProducts = async () => {
                 CATEGORIES
               </h2>
               <div className="space-y-2">
-                <button
-                  onClick={() => handleCategoryClick('all')}
-                  className={`w-full text-left px-4 py-3 transition-all duration-300 ${
-                    selectedCategory === 'all'
-                      ? 'bg-white text-black'
-                      : 'text-zinc-400 hover:text-white hover:bg-zinc-900'
-                  }`}
-                >
-                  All Products
-                </button>
                 {categories.map((category) => (
                   <button
                     key={category.id}
@@ -156,7 +132,7 @@ const fetchProducts = async () => {
             </div>
           </div>
 
-          {/* Mobile Filter Button */}
+          {/* Mobile Filter */}
           <div className="lg:hidden fixed bottom-6 right-6 z-40">
             <button
               onClick={() => setIsMobileFilterOpen(true)}
@@ -167,7 +143,6 @@ const fetchProducts = async () => {
             </button>
           </div>
 
-          {/* Mobile Filter Modal */}
           {isMobileFilterOpen && (
             <>
               <div
@@ -187,16 +162,6 @@ const fetchProducts = async () => {
                   </button>
                 </div>
                 <div className="space-y-2">
-                  <button
-                    onClick={() => handleCategoryClick('all')}
-                    className={`w-full text-left px-4 py-3 transition-all duration-300 ${
-                      selectedCategory === 'all'
-                        ? 'bg-white text-black'
-                        : 'text-zinc-400 hover:text-white hover:bg-zinc-900'
-                    }`}
-                  >
-                    All Products
-                  </button>
                   {categories.map((category) => (
                     <button
                       key={category.id}
@@ -237,7 +202,8 @@ const fetchProducts = async () => {
               <>
                 <div className="mb-6 flex items-center justify-between">
                   <p className="text-zinc-400">
-                    {products.length} {products.length === 1 ? 'product' : 'products'}
+                    {products.length}{' '}
+                    {products.length === 1 ? 'product' : 'products'}
                   </p>
                   <div className="text-zinc-600 text-sm">
                     {selectedCategory === 'all'
@@ -255,6 +221,7 @@ const fetchProducts = async () => {
                         animation: `fade-in-up 0.5s ease-out ${index * 0.05}s both`,
                       }}
                     >
+                      {/* Card Content */}
                       <div
                         className="relative aspect-square overflow-hidden cursor-pointer"
                         onClick={() => onViewProduct(product.slug)}
@@ -274,7 +241,9 @@ const fetchProducts = async () => {
                           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white text-black px-6 py-3 flex items-center space-x-2 opacity-0 group-hover:opacity-100 transform scale-90 group-hover:scale-100 transition-all duration-500"
                         >
                           <ShoppingBag className="w-4 h-4" />
-                          <span className="tracking-wider text-sm">ADD TO BAG</span>
+                          <span className="tracking-wider text-sm">
+                            ADD TO BAG
+                          </span>
                         </button>
 
                         {!product.in_stock && (
