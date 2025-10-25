@@ -15,10 +15,12 @@ interface Product {
 }
 
 const categories = [
-  { id: 'all', name: 'All' },
-  { id: 'necklace', name: 'Necklace' },
-  { id: 'bracelet', name: 'Bracelet' },
+  { id: 'all', name: 'All Products' },
   { id: 'earring', name: 'Earring' },
+  { id: 'ring', name: 'Ring' },
+  { id: 'necklace', name: 'Necklace' },
+  { id: 'Pearls Malas', name: 'Pearls Malas' },
+  { id: 'bracelet', name: 'Bracelet' },
 ];
 
 interface ProductsPageProps {
