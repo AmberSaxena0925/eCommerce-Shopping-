@@ -91,11 +91,16 @@ export default function ProductsPage({
   };
 
   return (
-    <div className="min-h-screen bg-black px-2 py-11 pt-32">
+    <div className="min-h-screen bg-black py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-      <center>
-         <div className="mb-12 animate-fade-in">
+        <div className="mb-12 animate-fade-in">
+          <button
+            onClick={onBack}
+            className="text-zinc-400 hover:text-white transition-colors mb-6 tracking-wider"
+          >
+            ← BACK TO HOME
+          </button>
           <h1 className="text-6xl font-light tracking-widest text-white mb-4">
             ALL PRODUCTS
           </h1>
@@ -103,8 +108,6 @@ export default function ProductsPage({
             Explore our complete collection of fine jewelry
           </p>
         </div>
-      </center>
-
 
         <div className="flex gap-8">
           {/* Desktop Sidebar Filter */}
