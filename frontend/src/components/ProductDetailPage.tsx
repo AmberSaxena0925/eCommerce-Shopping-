@@ -104,16 +104,8 @@ const fetchProduct = async () => {
   }
 
   return (
-    <div className="min-h-screen bg-black py-12">
+    <div className="min-h-screen bg-black px-4 py-12 pt-32">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <button
-          onClick={onBack}
-          className="flex items-center space-x-2 text-zinc-400 hover:text-white transition-colors mb-8 animate-fade-in"
-        >
-          <ArrowLeft className="w-5 h-5" />
-          <span className="tracking-wider">BACK TO SHOP</span>
-        </button>
-
         <div className="grid lg:grid-cols-2 gap-12">
           <div className="space-y-4">
             <div className="aspect-square bg-zinc-950 border border-zinc-800 overflow-hidden">

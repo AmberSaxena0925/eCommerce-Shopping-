@@ -69,7 +69,7 @@ export default function ProductGrid({ onAddToCart, onViewProduct }: ProductGridP
   }
 
   return (
-    <section id="products" className="py-24 bg-zinc-950">
+    <section id="products" className="px-4 py-12 pt-32 bg-zinc-950">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-5xl font-light tracking-widest text-white mb-4">
