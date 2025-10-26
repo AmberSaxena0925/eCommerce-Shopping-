@@ -11,17 +11,28 @@ interface NavbarProps {
   onLogout: () => void;
 }
 
-export default function Navbar({ cartCount, onCartClick, onAuthClick, onContactClick, onProductsClick, user, onLogout }: NavbarProps) {
+export default function Navbar({
+  cartCount,
+  onCartClick,
+  onAuthClick,
+  onContactClick,
+  onProductsClick,
+  user,
+  onLogout,
+}: NavbarProps) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-    };
+    const handleScroll = () => setIsScrolled(window.scrollY > 50);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  const scrollToHero = () => {
+    const heroSection = document.getElementById('hero');
+    heroSection?.scrollIntoView({ behavior: 'smooth' });
+  };
 
   return (
     <nav
@@ -31,25 +42,43 @@ export default function Navbar({ cartCount, onCartClick, onAuthClick, onContactC
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between">
-          <div className="text-2xl font-light tracking-widest text-white">
+          {/* Logo / Brand */}
+          <div
+            className="text-2xl font-light tracking-widest text-white cursor-pointer"
+            onClick={scrollToHero}
+          >
             SAI NAMAN PEARLS
           </div>
 
+          {/* Desktop menu */}
           <div className="hidden md:flex items-center space-x-12">
-            <a href="#collections" className="text-zinc-400 hover:text-white transition-colors tracking-wide">
-              COLLECTIONS
-            </a>
-            <button onClick={onProductsClick} className="text-zinc-400 hover:text-white transition-colors tracking-wide">
+            <button
+              onClick={scrollToHero}
+              className="text-zinc-400 hover:text-white transition-colors tracking-wide"
+            >
+              HOME
+            </button>
+            <button
+              onClick={onProductsClick}
+              className="text-zinc-400 hover:text-white transition-colors tracking-wide"
+            >
               PRODUCTS
             </button>
-            <a href="#about" className="text-zinc-400 hover:text-white transition-colors tracking-wide">
+            <a
+              href="#about"
+              className="text-zinc-400 hover:text-white transition-colors tracking-wide"
+            >
               ABOUT
             </a>
-            <button onClick={onContactClick} className="text-zinc-400 hover:text-white transition-colors tracking-wide">
+            <button
+              onClick={onContactClick}
+              className="text-zinc-400 hover:text-white transition-colors tracking-wide"
+            >
               CONTACT
             </button>
           </div>
 
+          {/* Right icons */}
           <div className="flex items-center space-x-6">
             {user ? (
               <div className="hidden md:flex items-center space-x-4">
@@ -82,6 +111,8 @@ export default function Navbar({ cartCount, onCartClick, onAuthClick, onContactC
                 </span>
               )}
             </button>
+
+            {/* Mobile menu toggle */}
             <button
               className="md:hidden text-zinc-400 hover:text-white transition-colors"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -92,27 +123,46 @@ export default function Navbar({ cartCount, onCartClick, onAuthClick, onContactC
         </div>
       </div>
 
+      {/* Mobile menu */}
       {isMobileMenuOpen && (
         <div className="md:hidden absolute top-full left-0 w-full bg-black/95 backdrop-blur-sm border-t border-zinc-800">
           <div className="flex flex-col space-y-6 p-6">
-            <a href="#collections" className="text-zinc-400 hover:text-white transition-colors tracking-wide">
-              COLLECTIONS
-            </a>
-            <button onClick={onProductsClick} className="text-zinc-400 hover:text-white transition-colors tracking-wide text-left">
+            <button
+              onClick={scrollToHero}
+              className="text-zinc-400 hover:text-white transition-colors tracking-wide text-left"
+            >
+              HOME
+            </button>
+            <button
+              onClick={onProductsClick}
+              className="text-zinc-400 hover:text-white transition-colors tracking-wide text-left"
+            >
               PRODUCTS
             </button>
-            <a href="#about" className="text-zinc-400 hover:text-white transition-colors tracking-wide">
+            <a
+              href="#about"
+              className="text-zinc-400 hover:text-white transition-colors tracking-wide"
+            >
               ABOUT
             </a>
-            <button onClick={onContactClick} className="text-zinc-400 hover:text-white transition-colors tracking-wide text-left">
+            <button
+              onClick={onContactClick}
+              className="text-zinc-400 hover:text-white transition-colors tracking-wide text-left"
+            >
               CONTACT
             </button>
             {user ? (
-              <button onClick={onLogout} className="text-zinc-400 hover:text-white transition-colors tracking-wide text-left">
+              <button
+                onClick={onLogout}
+                className="text-zinc-400 hover:text-white transition-colors tracking-wide text-left"
+              >
                 LOGOUT
               </button>
             ) : (
-              <button onClick={onAuthClick} className="text-zinc-400 hover:text-white transition-colors tracking-wide text-left">
+              <button
+                onClick={onAuthClick}
+                className="text-zinc-400 hover:text-white transition-colors tracking-wide text-left"
+              >
                 LOGIN
               </button>
             )}
