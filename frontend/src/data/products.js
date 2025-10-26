@@ -1,5 +1,3 @@
-import Category from "../../../backend/models/Category";
-
 export const localProducts = [
   {
     id: 'local-1',
