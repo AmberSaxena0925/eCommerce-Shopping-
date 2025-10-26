@@ -62,46 +62,59 @@ function App() {
       localStorage.setItem('guestCart', JSON.stringify(cartItems));
     }
   }, [cartItems, user]);
-
-  // Add product to cart
-  const handleAddToCart = async (product: Product) => {
-    if (user && token) {
-      try {
-        const productId = (product as any)._id || product.id;
-        const response = await axios.post(
-          'http://localhost:5001/api/cart/add',
-          {
-            productId,
-            name: product.name,
-            price: product.price,
-            images: product.images || [],
-            description: product.description || '',
-            materials: product.materials || [],
-            slug: product.slug || productId,
-            quantity: 1,
-          },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        setCartItems(response.data || []);
-        setIsCartOpen(true);
-      } catch (error: any) {
-        console.error('Full error:', error);
-        alert(`Failed to add product to cart: ${error.response?.data?.message || error.message}`);
-      }
-    } else {
-      // Guest cart
-      setCartItems((prev) => {
-        const existing = prev.find((item) => item.id === product.id);
-        if (existing) {
-          return prev.map((item) =>
-            item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
-          );
-        }
-        return [...prev, { ...product, quantity: 1 }];
-      });
+const handleAddToCart = async (product: Product) => {
+  if (user && token) {
+    try {
+      // MongoDB products have _id, local products have id
+      const productId = (product as any)._id || product.id;
+      
+      console.log('Adding product to cart:', {
+        productId,
+        product,
+      }); // Debug log
+      
+      const response = await axios.post(
+        'http://localhost:5001/api/cart/add',
+        {
+          productId: productId,
+          name: product.name,
+          price: product.price,
+          images: product.images || [],
+          description: product.description || '',
+          materials: product.materials || [],
+          slug: product.slug || productId,
+          quantity: 1,
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      
+      console.log('Cart response:', response.data); // Debug log
+      setCartItems(response.data);
       setIsCartOpen(true);
+    } catch (error: any) {
+      console.error('Full error:', error);
+      console.error('Error response:', error.response?.data);
+      
+      // Show more detailed error message
+      const errorMsg = error.response?.data?.message || error.message || 'Unknown error';
+      alert(`Failed to add product to cart: ${errorMsg}`);
     }
-  };
+  } else {
+    // Guest cart logic
+    setCartItems((prev) => {
+      const existing = prev.find((item) => item.id === product.id);
+      if (existing) {
+        return prev.map((item) =>
+          item.id === product.id
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        );
+      }
+      return [...prev, { ...product, quantity: 1 }];
+    });
+    setIsCartOpen(true);
+  }
+};
 
 const handleUpdateQuantity = async (productId: string, quantity: number) => {
   if (quantity === 0) {
