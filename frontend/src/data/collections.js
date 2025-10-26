@@ -6,7 +6,7 @@ export const localCollections = [
     slug: 'wedding-collection',
     category: 'necklace',
     description: 'Timeless designs made for your special day.',
-    image_url: '/images/collections/wedding.jpg',
+    image_url: 'https://i.pinimg.com/736x/d8/aa/b7/d8aab736e426ca0ca3286d3912be4474.jpg',
     featured: true,
   },
   {
@@ -15,7 +15,7 @@ export const localCollections = [
     slug: 'minimal-elegance',
     category: 'bracelet',
     description: 'Sleek, modern, and refined pieces for everyday luxury.',
-    image_url: '/images/collections/minimal.jpg',
+    image_url: 'https://i.pinimg.com/1200x/ac/24/07/ac24079c857d48947aa23828225308bd.jpg',
     featured: true,
   },
 ];
