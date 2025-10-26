@@ -1,3 +1,4 @@
+// src/App.tsx
 import { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
@@ -31,144 +32,122 @@ function App() {
   const [orderId, setOrderId] = useState<string>('');
   const [selectedProductSlug, setSelectedProductSlug] = useState<string>('');
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const { user, token, logout } = useAuth(); // ← Get token separately
+  const { user, token, logout } = useAuth();
 
-  // Fetch cart from backend on user login
+  // Fetch cart from backend or localStorage
   useEffect(() => {
     const fetchCart = async () => {
-      if (user && token) { // ← Check both user and token
+      if (user && token) {
         try {
           const response = await axios.get('http://localhost:5001/api/cart', {
-            headers: { Authorization: `Bearer ${token}` }, // ← Use token from context
+            headers: { Authorization: `Bearer ${token}` },
           });
-          setCartItems(response.data);
+          setCartItems(response.data || []);
         } catch (error) {
           console.error('Error fetching cart:', error);
         }
       } else {
-        // Load from localStorage for guests
         const savedCart = localStorage.getItem('guestCart');
-        if (savedCart) {
-          setCartItems(JSON.parse(savedCart));
-        }
+        if (savedCart) setCartItems(JSON.parse(savedCart));
       }
     };
     fetchCart();
-  }, [user, token]); // ← Add token to dependencies
+  }, [user, token]);
 
-  // Save guest cart to localStorage
+  // Save guest cart
   useEffect(() => {
-    if (!user && cartItems.length > 0) {
-      localStorage.setItem('guestCart', JSON.stringify(cartItems));
-    }
+    if (!user) localStorage.setItem('guestCart', JSON.stringify(cartItems));
   }, [cartItems, user]);
-const handleAddToCart = async (product: Product) => {
-  if (user && token) {
-    try {
-      // MongoDB products have _id, local products have id
-      const productId = (product as any)._id || product.id;
-      
-      console.log('Adding product to cart:', {
-        productId,
-        product,
-      }); // Debug log
-      
-      const response = await axios.post(
-        'http://localhost:5001/api/cart/add',
-        {
-          productId: productId,
-          name: product.name,
-          price: product.price,
-          images: product.images || [],
-          description: product.description || '',
-          materials: product.materials || [],
-          slug: product.slug || productId,
-          quantity: 1,
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      
-      console.log('Cart response:', response.data); // Debug log
-      setCartItems(response.data);
-      setIsCartOpen(true);
-    } catch (error: any) {
-      console.error('Full error:', error);
-      console.error('Error response:', error.response?.data);
-      
-      // Show more detailed error message
-      const errorMsg = error.response?.data?.message || error.message || 'Unknown error';
-      alert(`Failed to add product to cart: ${errorMsg}`);
-    }
-  } else {
-    // Guest cart logic
-    setCartItems((prev) => {
-      const existing = prev.find((item) => item.id === product.id);
-      if (existing) {
-        return prev.map((item) =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
+
+  // Add product to cart
+  const handleAddToCart = async (product: Product) => {
+    if (user && token) {
+      try {
+        const productId = (product as any)._id || product.id;
+        const response = await axios.post(
+          'http://localhost:5001/api/cart/add',
+          {
+            productId,
+            name: product.name,
+            price: product.price,
+            images: product.images || [],
+            description: product.description || '',
+            materials: product.materials || [],
+            slug: product.slug || productId,
+            quantity: 1,
+          },
+          { headers: { Authorization: `Bearer ${token}` } }
         );
+        setCartItems(response.data || []);
+        setIsCartOpen(true);
+      } catch (error: any) {
+        console.error('Full error:', error);
+        alert(`Failed to add product to cart: ${error.response?.data?.message || error.message}`);
       }
-      return [...prev, { ...product, quantity: 1 }];
-    });
-    setIsCartOpen(true);
-  }
-};
-
-const handleUpdateQuantity = async (productId: string, quantity: number) => {
-  if (quantity === 0) {
-    handleRemoveItem(productId);
-    return;
-  }
-
-  if (user && token) {
-    try {
-      const response = await axios.post(
-        'http://localhost:5001/api/cart/update',
-        { productId, quantity },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      setCartItems(response.data);
-    } catch (error) {
-      console.error('Error updating quantity:', error);
+    } else {
+      // Guest cart
+      setCartItems((prev) => {
+        const existing = prev.find((item) => item.id === product.id);
+        if (existing) {
+          return prev.map((item) =>
+            item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
+          );
+        }
+        return [...prev, { ...product, quantity: 1 }];
+      });
+      setIsCartOpen(true);
     }
-  } else {
-    // Guest cart logic
-    setCartItems((prev) =>
-      prev.map((item) =>
-        (item.id === productId || (item as any)._id === productId)
-          ? { ...item, quantity }
-          : item
-      )
-    );
-  }
-};
+  };
 
-const handleRemoveItem = async (productId: string) => {
-  if (user && token) {
-    try {
-      const response = await axios.post(
-        'http://localhost:5001/api/cart/remove',
-        { productId },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      setCartItems(response.data);
-    } catch (error) {
-      console.error('Error removing from cart:', error);
+  // Update quantity
+  const handleUpdateQuantity = async (productId: string, quantity: number) => {
+    if (quantity === 0) {
+      handleRemoveItem(productId);
+      return;
     }
-  } else {
-    // Guest cart logic
-    setCartItems((prev) => 
-      prev.filter((item) => 
-        item.id !== productId && (item as any)._id !== productId
-      )
-    );
-  }
-};
+    if (user && token) {
+      try {
+        const response = await axios.post(
+          'http://localhost:5001/api/cart/update',
+          { productId, quantity },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setCartItems(response.data || []);
+      } catch (error) {
+        console.error('Error updating quantity:', error);
+      }
+    } else {
+      setCartItems((prev) =>
+        prev.map((item) =>
+          item.id === productId || (item as any)._id === productId ? { ...item, quantity } : item
+        )
+      );
+    }
+  };
 
-  const handleViewProduct = (productSlug: string) => {
-    setSelectedProductSlug(productSlug);
+  // Remove item
+  const handleRemoveItem = async (productId: string) => {
+    if (user && token) {
+      try {
+        const response = await axios.post(
+          'http://localhost:5001/api/cart/remove',
+          { productId },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setCartItems(response.data || []);
+      } catch (error) {
+        console.error('Error removing from cart:', error);
+      }
+    } else {
+      setCartItems((prev) =>
+        prev.filter((item) => item.id !== productId && (item as any)._id !== productId)
+      );
+    }
+  };
+
+  // Navigation handlers
+  const handleViewProduct = (slug: string) => {
+    setSelectedProductSlug(slug);
     setCurrentView('product');
   };
 
@@ -181,78 +160,37 @@ const handleRemoveItem = async (productId: string) => {
     setOrderId(newOrderId);
     setCurrentView('confirmation');
     setCartItems([]);
-    if (!user) {
-      localStorage.removeItem('guestCart');
-    }
+    if (!user) localStorage.removeItem('guestCart');
   };
 
   const handleBackToHome = () => {
     setCurrentView('home');
-    window.scrollTo(0, 0);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  if (isLoading) {
-    return <LoadingScreen onComplete={() => setIsLoading(false)} />;
-  }
-
-  if (currentView === 'checkout') {
-    return (
-      <CheckoutPage
-        items={cartItems}
-        onBack={() => {
-          setCurrentView('home');
-          setIsCartOpen(true);
-        }}
-        onOrderComplete={handleOrderComplete}
-      />
-    );
-  }
-
-  if (currentView === 'confirmation') {
-    return (
-      <OrderConfirmation orderId={orderId} onBackToHome={handleBackToHome} />
-    );
-  }
-
-  if (currentView === 'product') {
-    return (
-      <ProductDetailPage
-        productSlug={selectedProductSlug}
-        onBack={handleBackToHome}
-        onAddToCart={handleAddToCart}
-      />
-    );
-  }
-
-  if (currentView === 'contact') {
-    return <ContactPage onBack={handleBackToHome} />;
-  }
-
-  if (currentView === 'products') {
-    return (
-      <ProductsPage
-        onBack={handleBackToHome}
-        onViewProduct={handleViewProduct}
-        onAddToCart={handleAddToCart}
-      />
-    );
-  }
+  if (isLoading) return <LoadingScreen onComplete={() => setIsLoading(false)} />;
 
   return (
     <div className="min-h-screen bg-black">
+      {/* Navbar always visible */}
       <Navbar
         cartCount={cartItems.reduce((sum, item) => sum + item.quantity, 0)}
         onCartClick={() => setIsCartOpen(true)}
         onAuthClick={() => setIsAuthModalOpen(true)}
-        onContactClick={() => setCurrentView('contact')}
+        onHomeClick={handleBackToHome}
         onProductsClick={() => setCurrentView('products')}
+        onContactClick={() => setCurrentView('contact')}
         user={user}
         onLogout={logout}
       />
+
+      {/* Auth modal */}
       <AuthModal
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
       />
+
+      {/* Cart sidebar */}
       <CartSidebar
         isOpen={isCartOpen}
         onClose={() => setIsCartOpen(false)}
@@ -261,10 +199,48 @@ const handleRemoveItem = async (productId: string) => {
         onUpdateQuantity={handleUpdateQuantity}
         onRemoveItem={handleRemoveItem}
       />
-      <Hero />
-      <FeaturedCollections />
-      <ProductGrid onAddToCart={handleAddToCart} onViewProduct={handleViewProduct} />
-      <About />
+
+      {/* Page content */}
+      {currentView === 'home' && (
+        <>
+          <Hero />
+          <FeaturedCollections />
+          <ProductGrid onAddToCart={handleAddToCart} onViewProduct={handleViewProduct} />
+          <About />
+        </>
+      )}
+
+      {currentView === 'products' && (
+        <ProductsPage
+          onBack={handleBackToHome}
+          onViewProduct={handleViewProduct}
+          onAddToCart={handleAddToCart}
+        />
+      )}
+
+      {currentView === 'product' && (
+        <ProductDetailPage
+          productSlug={selectedProductSlug}
+          onBack={handleBackToHome}
+          onAddToCart={handleAddToCart}
+        />
+      )}
+
+      {currentView === 'checkout' && (
+        <CheckoutPage
+          items={cartItems}
+          onBack={handleBackToHome}
+          onOrderComplete={handleOrderComplete}
+        />
+      )}
+
+      {currentView === 'confirmation' && (
+        <OrderConfirmation orderId={orderId} onBackToHome={handleBackToHome} />
+      )}
+
+      {currentView === 'contact' && <ContactPage onBack={handleBackToHome} />}
+
+      {/* Footer always visible */}
       <Footer onContactClick={() => setCurrentView('contact')} />
     </div>
   );

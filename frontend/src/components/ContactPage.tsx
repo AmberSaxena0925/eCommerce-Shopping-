@@ -62,7 +62,7 @@ export default function ContactPage({ onBack }: ContactPageProps) {
   };
 
   return (
-    <div className="min-h-screen bg-black py-12">
+    <div className="min-h-screen bg-black px-4 py-12 pt-32">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16 animate-fade-in">
           <h1 className="text-6xl font-light tracking-widest text-white mb-6">
