@@ -72,6 +72,7 @@ function App() {
             price: product.price,
             images: product.images || [],
             description: product.description || '',
+            category_id: product.category_id || '',
             materials: product.materials || [],
             slug: product.slug || productId,
             quantity: 1,
