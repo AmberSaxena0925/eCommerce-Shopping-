@@ -1,40 +1,6 @@
 export const localProducts = [
   {
     id: 'local-1',
-    name: 'Golden Pearl Necklace',
-    slug: 'golden-pearl-necklace',
-    description: 'A stunning handcrafted necklace featuring natural pearls and 18k gold.',
-    price: 1299,
-    images: ['https://i.pinimg.com/1200x/00/34/62/0034624634c52395308e13d9e03dd1be.jpg'],
-    materials: ['Gold', 'Pearl'],
-    in_stock: true,
-    featured: true,
-  },
-  {
-    id: 'local-2',
-    name: 'Silver Hoop Earrings',
-    slug: 'silver-hoop-earrings',
-    description: 'Elegant sterling silver hoops with a timeless minimalist design.',
-    price: 499,
-    images: ['https://i.pinimg.com/1200x/11/12/a4/1112a46212544e44c9d303d61f133bbc.jpg'],
-    materials: ['Silver'],
-    in_stock: true,
-    featured: true,
-    category: 'necklace',
-  },
-  {
-    id: 'local-3',
-    name: 'Rose Gold Bracelet',
-    slug: 'rose-gold-bracelet',
-    description: 'Delicate rose gold bracelet with diamond accents for special occasions.',
-    price: 899,
-    images: ['https://i.pinimg.com/736x/f7/76/2a/f7762a6d97ec0f284b64412cef76619f.jpg'],
-    materials: ['Rose Gold', 'Diamond'],
-    in_stock: true,
-    featured: false,
-  },
-  {
-    id: 'local-4',
     name: 'Eclat Circle',
     slug: 'eclat-circle',
     description: `Each bangle is a perfect circle of luminous beauty, meticulously crafted from flawless, hand-selected pearls. 
@@ -43,12 +9,95 @@ export const localProducts = [
     These are not mere accessories, but a symbol of pure, refined grace, designed to adorn the wrist with an air of effortless prestige.`,
     price: 1999,
     mrp: 3200,
+    category: 'bracelet',
     images: [
-      '/images/products/eclat1.png', // Guarantee Certificate
-      '/images/products/eclat2.png', // Bracelet on wrist
-      '/images/products/eclat3.png', // Bracelet close-up
+      '/images/products/eclat1.png',
+      '/images/products/eclat2.png',
+      '/images/products/eclat3.png',
     ],
     materials: ['Pearl', 'Silver'],
+    in_stock: true,
+    featured: true,
+  },
+  {
+    id: 'local-2',
+    name: 'Heirloom Luster',
+    slug: 'heirloom-luster',
+    description: `An exquisite cascade of luminous pearls, this bracelet encircles the wrist with effortless grace. 
+    Each pearl is meticulously chosen for its perfect roundness and deep, radiant luster, creating an unbroken strand of opalescent light.  
+    Worn alone, it is a statement of pure, understated elegance. This piece is the very essence of classic sophistication, 
+    a timeless treasure that imparts a touch of refined luxury to any gesture.`,
+    price: 999,
+    mrp: 1799,
+    category: 'bracelet',
+    images: [
+      '/images/products/heirloom1.png',
+      '/images/products/heirloom2.png',
+      '/images/products/heirloom3.png',
+    ],
+    materials: ['Pearl', 'Gold Plating'],
+    in_stock: true,
+    featured: true,
+  },
+  {
+    id: 'local-3',
+    name: 'The Luna Kiss',
+    slug: 'the-luna-kiss',
+    description: `Behold the captivating beauty of a single, perfect pearl, resting with serene elegance. 
+    This magnificent gem, born of the ocean, is chosen for its flawless, spherical form and exceptional luster. 
+    It seems to glow from within, radiating a soft, creamy iridescence that is both pure and profound. 
+    This is a timeless emblem of sophistication, celebrating the simple, organic beauty of a real pearl in its most perfect state.`,
+    price: 799,
+    mrp: 1499,
+    category: 'ring',
+    images: [
+      '/images/products/luna1.png',
+      '/images/products/luna2.png',
+      '/images/products/luna3.png',
+    ],
+    materials: ['Pearl', 'Silver'],
+    in_stock: true,
+    featured: true,
+  },
+  {
+    id: 'local-4',
+    name: 'The Signature',
+    slug: 'the-signature',
+    description: `Adorn yourself in timeless sophistication with this exquisite pearl jewellery set. 
+    Each luminous pearl is hand-selected for its radiant luster, delicately set within a graceful, shimmering framework of sparkling stones. 
+    The necklace drapes beautifully, drawing the eye to a brilliant, floral-inspired centerpiece that captures light from every angle. 
+    Paired with elegant matching earrings, this set is the epitome of classic grace and modern luxury, 
+    designed to elevate any occasion with an air of refined glamour.`,
+    price: 3100,
+    mrp: 5500,
+    Category: 'necklace',
+    images: [
+      '/images/products/signature1.png',
+      '/images/products/signature2.png',
+      '/images/products/signature3.png',
+    ],
+    materials: ['Pearl', 'Gold Plating', 'Cubic Zirconia'],
+    in_stock: true,
+    featured: true,
+  },
+  {
+    id: 'local-5',
+    name: 'Celestial Drop',
+    slug: 'celestial-drop',
+    description: `Experience a cascade of refined luxury. These captivating earrings are meticulously crafted, 
+    featuring a gracefully sculpted heart that flows seamlessly into a brilliant, bezel-set solitaire. 
+    This fiery crystal acts as the perfect, sparkling transition to the main event: a flawless, iridescent pearl drop. 
+    The pearl's organic, creamy glow provides a stunning contrast to the clean lines of the gold and the sharp sparkle of the crystal. 
+    This is a design of pure elegance, evoking a feeling of quiet confidence and sophisticated taste.`,
+    price: 749,
+    mrp: 1199,
+    category: 'earring',
+    images: [
+      '/images/products/celestial1.png',
+      '/images/products/celestial2.png',
+      '/images/products/celestial3.png',
+    ],
+    materials: ['Pearl', 'Gold', 'Crystal'],
     in_stock: true,
     featured: true,
   },
