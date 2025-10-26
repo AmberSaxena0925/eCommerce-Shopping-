@@ -1,16 +1,17 @@
 export interface Product {
   id: string;
+  _id?: string; // ← Add this for MongoDB products
   name: string;
   slug: string;
   description: string;
   price: number;
-  category_id?: string;
-  collection_id?: string | null;
   images: string[];
   materials: string[];
   in_stock: boolean;
   featured?: boolean;
-  created_at?: string;
+  category?: string;
+  category_id?: string;
+  collection_id?: string;
 }
 
 export interface Collection {

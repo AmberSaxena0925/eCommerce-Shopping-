@@ -8,7 +8,7 @@ interface CartItem extends Product {
 interface CartSidebarProps {
   isOpen: boolean;
   onClose: () => void;
-  items: Product[];
+  items: CartItem[]; // Changed from Product[] to CartItem[]
   onCheckout: () => void;
   onUpdateQuantity: (productId: string, quantity: number) => void;
   onRemoveItem: (productId: string) => void;
@@ -22,15 +22,8 @@ export default function CartSidebar({
   onUpdateQuantity,
   onRemoveItem,
 }: CartSidebarProps) {
-  const cartItems = items.reduce((acc, item) => {
-    const existing = acc.find((i) => i.id === item.id);
-    if (existing) {
-      existing.quantity += 1;
-    } else {
-      acc.push({ ...item, quantity: 1 });
-    }
-    return acc;
-  }, [] as CartItem[]);
+  // No need to reduce items anymore - they already have quantity
+  const cartItems = items;
 
   const total = cartItems.reduce(
     (sum, item) => sum + item.price * item.quantity,

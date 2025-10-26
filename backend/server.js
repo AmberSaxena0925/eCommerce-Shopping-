@@ -4,21 +4,32 @@ const mongoose = require('mongoose');
 require('dotenv').config();
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 
-// middleware
-app.use(cors());
+// ✅ 1. CORS FIRST
+app.use(cors({
+  origin: 'http://localhost:5173',
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+// ✅ 2. BODY PARSER - THIS WAS MISSING!
 app.use(express.json());
 
-// routes
+// ✅ 3. ROUTES
 const authRoutes = require('./routes/auth');
 app.use('/api/auth', authRoutes);
-// contact route
+
+const cartRoutes = require('./routes/cart');
+app.use('/api/cart', cartRoutes);
+
 const contactRoutes = require('./routes/contact');
 app.use('/api/contact', contactRoutes);
-// content (products/categories/collections)
+
 const contentRoutes = require('./routes/content');
 app.use('/api', contentRoutes);
+
 const ordersRoutes = require('./routes/orders');
 app.use('/api', ordersRoutes);
 
@@ -27,41 +38,38 @@ app.get('/api/health', (req, res) => res.json({ ok: true }));
 
 // start server after optional DB connect
 async function start() {
-	const mongo = process.env.MONGO_URI;
-	try {
-		if (mongo) {
-			await mongoose.connect(mongo, { useNewUrlParser: true, useUnifiedTopology: true });
-			console.log('Connected to MongoDB');
-		} else {
-			console.log('MONGO_URI not set — skipping MongoDB connection (server will still run)');
-		}
+  const mongo = process.env.MONGO_URI;
+  try {
+    if (mongo) {
+      await mongoose.connect(mongo, { useNewUrlParser: true, useUnifiedTopology: true });
+      console.log('Connected to MongoDB');
+    } else {
+      console.log('MONGO_URI not set — skipping MongoDB connection (server will still run)');
+    }
 
-		app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-	} catch (err) {
-		console.error('Failed to start server', err);
-		process.exit(1);
-	}
+    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+  } catch (err) {
+    console.error('Failed to start server', err);
+    process.exit(1);
+  }
 }
 
 start();
 
-// Fallback for unmatched routes (return JSON instead of HTML)
+// Fallback for unmatched routes
 app.use((req, res) => {
-	if (req.path.startsWith('/api')) {
-		return res.status(404).json({ message: 'API route not found' });
-	}
-	// For non-API paths, let frontend dev server handle SPA routes
-	res.status(404).send('Not found');
+  if (req.path.startsWith('/api')) {
+    return res.status(404).json({ message: 'API route not found' });
+  }
+  res.status(404).send('Not found');
 });
 
-// Global error handler to ensure JSON responses for errors
+// Global error handler
 app.use((err, req, res, next) => {
-	console.error('Unhandled error:', err);
-	const status = err.status || 500;
-	// send JSON for API routes
-	if (req.path.startsWith('/api')) {
-		return res.status(status).json({ message: err.message || 'Server error' });
-	}
-	res.status(status).send(err.message || 'Server error');
+  console.error('Unhandled error:', err);
+  const status = err.status || 500;
+  if (req.path.startsWith('/api')) {
+    return res.status(status).json({ message: err.message || 'Server error' });
+  }
+  res.status(status).send(err.message || 'Server error');
 });
-

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import FeaturedCollections from './components/FeaturedCollections';
@@ -15,53 +15,161 @@ import ProductsPage from './components/ProductsPage';
 import LoadingScreen from './components/LoadingScreen';
 import { Product } from './types';
 import { useAuth } from './context/AuthContext';
+import axios from 'axios';
+
+interface CartItem extends Product {
+  quantity: number;
+}
 
 type View = 'home' | 'checkout' | 'confirmation' | 'product' | 'contact' | 'products';
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
-  const [cartItems, setCartItems] = useState<Product[]>([]);
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [currentView, setCurrentView] = useState<View>('home');
   const [orderId, setOrderId] = useState<string>('');
   const [selectedProductSlug, setSelectedProductSlug] = useState<string>('');
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const { user, logout } = useAuth();
- 
+  const { user, token, logout } = useAuth(); // ← Get token separately
 
-  const handleAddToCart = (product: Product) => {
-    setCartItems((prev) => [...prev, product]);
+  // Fetch cart from backend on user login
+  useEffect(() => {
+    const fetchCart = async () => {
+      if (user && token) { // ← Check both user and token
+        try {
+          const response = await axios.get('http://localhost:5001/api/cart', {
+            headers: { Authorization: `Bearer ${token}` }, // ← Use token from context
+          });
+          setCartItems(response.data);
+        } catch (error) {
+          console.error('Error fetching cart:', error);
+        }
+      } else {
+        // Load from localStorage for guests
+        const savedCart = localStorage.getItem('guestCart');
+        if (savedCart) {
+          setCartItems(JSON.parse(savedCart));
+        }
+      }
+    };
+    fetchCart();
+  }, [user, token]); // ← Add token to dependencies
+
+  // Save guest cart to localStorage
+  useEffect(() => {
+    if (!user && cartItems.length > 0) {
+      localStorage.setItem('guestCart', JSON.stringify(cartItems));
+    }
+  }, [cartItems, user]);
+const handleAddToCart = async (product: Product) => {
+  if (user && token) {
+    try {
+      // MongoDB products have _id, local products have id
+      const productId = (product as any)._id || product.id;
+      
+      console.log('Adding product to cart:', {
+        productId,
+        product,
+      }); // Debug log
+      
+      const response = await axios.post(
+        'http://localhost:5001/api/cart/add',
+        {
+          productId: productId,
+          name: product.name,
+          price: product.price,
+          images: product.images || [],
+          description: product.description || '',
+          materials: product.materials || [],
+          slug: product.slug || productId,
+          quantity: 1,
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      
+      console.log('Cart response:', response.data); // Debug log
+      setCartItems(response.data);
+      setIsCartOpen(true);
+    } catch (error: any) {
+      console.error('Full error:', error);
+      console.error('Error response:', error.response?.data);
+      
+      // Show more detailed error message
+      const errorMsg = error.response?.data?.message || error.message || 'Unknown error';
+      alert(`Failed to add product to cart: ${errorMsg}`);
+    }
+  } else {
+    // Guest cart logic
+    setCartItems((prev) => {
+      const existing = prev.find((item) => item.id === product.id);
+      if (existing) {
+        return prev.map((item) =>
+          item.id === product.id
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        );
+      }
+      return [...prev, { ...product, quantity: 1 }];
+    });
     setIsCartOpen(true);
-  };
+  }
+};
+
+const handleUpdateQuantity = async (productId: string, quantity: number) => {
+  if (quantity === 0) {
+    handleRemoveItem(productId);
+    return;
+  }
+
+  if (user && token) {
+    try {
+      const response = await axios.post(
+        'http://localhost:5001/api/cart/update',
+        { productId, quantity },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setCartItems(response.data);
+    } catch (error) {
+      console.error('Error updating quantity:', error);
+    }
+  } else {
+    // Guest cart logic
+    setCartItems((prev) =>
+      prev.map((item) =>
+        (item.id === productId || (item as any)._id === productId)
+          ? { ...item, quantity }
+          : item
+      )
+    );
+  }
+};
+
+const handleRemoveItem = async (productId: string) => {
+  if (user && token) {
+    try {
+      const response = await axios.post(
+        'http://localhost:5001/api/cart/remove',
+        { productId },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setCartItems(response.data);
+    } catch (error) {
+      console.error('Error removing from cart:', error);
+    }
+  } else {
+    // Guest cart logic
+    setCartItems((prev) => 
+      prev.filter((item) => 
+        item.id !== productId && (item as any)._id !== productId
+      )
+    );
+  }
+};
 
   const handleViewProduct = (productSlug: string) => {
     setSelectedProductSlug(productSlug);
     setCurrentView('product');
-  };
-
-  const handleUpdateQuantity = (productId: string, quantity: number) => {
-    if (quantity === 0) {
-      setCartItems((prev) => prev.filter((item) => item.id !== productId));
-      return;
-    }
-
-    const currentItem = cartItems.find((item) => item.id === productId);
-    if (!currentItem) return;
-
-    const currentCount = cartItems.filter(
-      (item) => item.id === productId
-    ).length;
-
-    if (quantity > currentCount) {
-      setCartItems((prev) => [...prev, currentItem]);
-    } else if (quantity < currentCount) {
-      const index = cartItems.findIndex((item) => item.id === productId);
-      setCartItems((prev) => prev.filter((_, i) => i !== index));
-    }
-  };
-
-  const handleRemoveItem = (productId: string) => {
-    setCartItems((prev) => prev.filter((item) => item.id !== productId));
   };
 
   const handleCheckout = () => {
@@ -73,6 +181,9 @@ function App() {
     setOrderId(newOrderId);
     setCurrentView('confirmation');
     setCartItems([]);
+    if (!user) {
+      localStorage.removeItem('guestCart');
+    }
   };
 
   const handleBackToHome = () => {
@@ -130,7 +241,7 @@ function App() {
   return (
     <div className="min-h-screen bg-black">
       <Navbar
-        cartCount={cartItems.length}
+        cartCount={cartItems.reduce((sum, item) => sum + item.quantity, 0)}
         onCartClick={() => setIsCartOpen(true)}
         onAuthClick={() => setIsAuthModalOpen(true)}
         onContactClick={() => setCurrentView('contact')}

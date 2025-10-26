@@ -50,15 +50,19 @@ router.get('/categories', async (req, res) => {
 });
 
 // GET /api/products - optional ?featured=true or ?category_id=<id>
+// In your GET /api/products route
 router.get('/products', async (req, res) => {
   try {
-    const q = {};
-    if (req.query.featured === 'true') q.featured = true;
-    if (req.query.category_id) q.category_id = req.query.category_id;
-
-    const products = await Product.find(q).sort({ createdAt: -1 });
-    console.log(`[content route] products returned: ${Array.isArray(products) ? products.length : 0} (query: ${JSON.stringify(req.query)})`);
-    res.json(products);
+    // ... your existing query logic
+    const products = await Product.find(query);
+    
+    // Format products to include both _id and id
+    const formattedProducts = products.map(p => ({
+      ...p.toObject(),
+      id: p._id.toString(), // ← Add id field for frontend
+    }));
+    
+    res.json(formattedProducts);
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server error' });
