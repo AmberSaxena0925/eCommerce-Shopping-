@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { ShoppingBag } from 'lucide-react';
-import { localProducts } from '../data/products'; // 👈 import your hardcoded products file
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { localProducts } from '../data/products';
 
 interface Product {
   id: string;
@@ -42,20 +44,31 @@ export default function ProductGrid({ onAddToCart, onViewProduct }: ProductGridP
         backendProducts = Array.isArray(data) ? data : [];
       }
 
-      // ✅ Combine backend + local hardcoded products
       const combined = [...backendProducts, ...localProducts].filter((p) => p.featured);
-
-      // ✅ Remove duplicates based on slug (to prevent duplicates if same product exists in both)
       const deduped = Array.from(new Map(combined.map((p) => [p.slug, p])).values());
-
       setProducts(deduped);
     } catch (err) {
       console.error('Failed to load products', err);
-      // ✅ Fallback to local hardcoded ones if API fails
       setProducts(localProducts.filter((p) => p.featured));
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleAddToCart = (product: Product, e: React.MouseEvent) => {
+    e.stopPropagation();
+    onAddToCart(product);
+
+    // ✅ Toast animation when added to cart
+    toast.success(`${product.name} added to your bag! 🛍️`, {
+      position: 'top-right',
+      autoClose: 2000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      theme: 'dark',
+    });
   };
 
   if (loading) {
@@ -70,6 +83,9 @@ export default function ProductGrid({ onAddToCart, onViewProduct }: ProductGridP
 
   return (
     <section id="products" className="py-24 bg-zinc-950">
+      {/* ✅ Toast Container */}
+      <ToastContainer />
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-5xl font-light tracking-widest text-white mb-4">
@@ -101,10 +117,7 @@ export default function ProductGrid({ onAddToCart, onViewProduct }: ProductGridP
                 <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
                 <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onAddToCart(product);
-                  }}
+                  onClick={(e) => handleAddToCart(product, e)}
                   className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white text-black px-6 py-3 flex items-center space-x-2 opacity-0 group-hover:opacity-100 transform scale-90 group-hover:scale-100 transition-all duration-500"
                 >
                   <ShoppingBag className="w-4 h-4" />

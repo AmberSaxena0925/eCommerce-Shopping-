@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
-import { ArrowLeft, ShoppingBag, Heart, Share2, Check } from 'lucide-react';
-import { localProducts } from '../data/products'; 
-
+import { ShoppingBag, Share2, Check } from 'lucide-react';
+import { localProducts } from '../data/products';
 
 interface Product {
   id: string;
@@ -33,50 +32,70 @@ export default function ProductDetailPage({
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [addedToCart, setAddedToCart] = useState(false);
+  const [shareMessage, setShareMessage] = useState<string | null>(null);
 
   useEffect(() => {
     fetchProduct();
     window.scrollTo(0, 0);
   }, [productSlug]);
 
-const fetchProduct = async () => {
-  setLoading(true);
-  try {
-    const res = await fetch(`/api/products/${encodeURIComponent(productSlug)}`);
-    if (!res.ok) {
-      console.warn('Backend product not found, checking local data...');
+  const fetchProduct = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/products/${encodeURIComponent(productSlug)}`);
+      if (!res.ok) {
+        console.warn('Backend product not found, checking local data...');
+        const local = localProducts.find(p => p.slug === productSlug);
+        setProduct(local || null);
+        return;
+      }
+
+      const data = await res.json();
+      setProduct(data || localProducts.find(p => p.slug === productSlug) || null);
+    } catch (err) {
+      console.error('Failed to load product from backend, checking local data...', err);
       const local = localProducts.find(p => p.slug === productSlug);
       setProduct(local || null);
-      return;
+    } finally {
+      setLoading(false);
     }
-
-    const data = await res.json();
-    if (data) {
-      setProduct(data);
-    } else {
-      // If API returned empty, use local fallback
-      const local = localProducts.find(p => p.slug === productSlug);
-      setProduct(local || null);
-    }
-  } catch (err) {
-    console.error('Failed to load product from backend, checking local data...', err);
-    const local = localProducts.find(p => p.slug === productSlug);
-    setProduct(local || null);
-  } finally {
-    setLoading(false);
-  }
-};
-
+  };
 
   const handleAddToCart = () => {
     if (!product) return;
-
     for (let i = 0; i < quantity; i++) {
       onAddToCart(product);
     }
-
     setAddedToCart(true);
     setTimeout(() => setAddedToCart(false), 2000);
+  };
+
+  // ✅ SHARE button logic
+  const handleShare = async () => {
+    if (!product) return;
+
+    const productUrl = `${window.location.origin}/product/${product.slug}`;
+    const shareText = `Check out this ${product.name} — ${productUrl}`;
+
+    try {
+      if (navigator.share) {
+        // 📱 Native mobile share dialog
+        await navigator.share({
+          title: product.name,
+          text: product.description || 'Check out this product!',
+          url: productUrl,
+        });
+      } else {
+        // 💻 Desktop: fallback to clipboard
+        await navigator.clipboard.writeText(shareText);
+        setShareMessage('🔗 Link copied!');
+        setTimeout(() => setShareMessage(null), 2000);
+      }
+    } catch (error) {
+      console.error('Error sharing:', error);
+      setShareMessage('❌ Failed to share');
+      setTimeout(() => setShareMessage(null), 2000);
+    }
   };
 
   if (loading) {
@@ -92,10 +111,7 @@ const fetchProduct = async () => {
       <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-zinc-400 text-center">
           <p className="text-xl mb-4">Product not found</p>
-          <button
-            onClick={onBack}
-            className="text-white hover:underline"
-          >
+          <button onClick={onBack} className="text-white hover:underline">
             Return to shop
           </button>
         </div>
@@ -104,17 +120,19 @@ const fetchProduct = async () => {
   }
 
   return (
-    <div className="min-h-screen bg-black py-12">
+    <div className="min-h-screen bg-black px-4 py-12 pt-32">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <button
-          onClick={onBack}
-          className="flex items-center space-x-2 text-zinc-400 hover:text-white transition-colors mb-8 animate-fade-in"
-        >
-          <ArrowLeft className="w-5 h-5" />
-          <span className="tracking-wider">BACK TO SHOP</span>
-        </button>
+        <div className="flex justify-end">
+          <button
+            onClick={onBack}
+            className="text-zinc-400 hover:text-white transition-colors mb-6 tracking-wider"
+          >
+            ← BACK TO HOME
+          </button>
+        </div>
 
         <div className="grid lg:grid-cols-2 gap-12">
+          {/* Left section - Images */}
           <div className="space-y-4">
             <div className="aspect-square bg-zinc-950 border border-zinc-800 overflow-hidden">
               <img
@@ -147,6 +165,7 @@ const fetchProduct = async () => {
             )}
           </div>
 
+          {/* Right section - Details */}
           <div className="space-y-8">
             <div>
               <h1 className="text-5xl font-light tracking-wider text-white mb-4">
@@ -176,6 +195,7 @@ const fetchProduct = async () => {
               </div>
             </div>
 
+            {/* Quantity and buttons */}
             <div>
               <h3 className="text-zinc-400 text-sm tracking-wider mb-3">
                 QUANTITY
@@ -220,52 +240,48 @@ const fetchProduct = async () => {
                 </button>
 
                 <div className="grid grid-cols-2 gap-4">
-                  <button className="border border-zinc-800 text-white py-4 tracking-widest hover:border-white transition-colors flex items-center justify-center space-x-2">
-                    <Heart className="w-5 h-5" />
-                    <span>SAVE</span>
-                  </button>
-                  <button className="border border-zinc-800 text-white py-4 tracking-widest hover:border-white transition-colors flex items-center justify-center space-x-2">
+                  <button
+                    onClick={handleShare}
+                    className="border border-zinc-800 text-white py-4 tracking-widest hover:border-white transition-colors flex items-center justify-center space-x-2"
+                  >
                     <Share2 className="w-5 h-5" />
                     <span>SHARE</span>
                   </button>
                 </div>
+
+                {/* Share message feedback */}
+                {shareMessage && (
+                  <p className="text-center text-zinc-400 text-sm mt-2">
+                    {shareMessage}
+                  </p>
+                )}
               </div>
             </div>
 
+            {/* Benefits */}
             <div className="bg-zinc-950 border border-zinc-800 p-6 space-y-4">
-              <div className="flex items-start space-x-3">
-                <Check className="w-5 h-5 text-white flex-shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-white font-light mb-1">
-                    Complimentary Gift Packaging
-                  </p>
-                  <p className="text-zinc-500 text-sm">
-                    Each piece arrives in our signature box
-                  </p>
+              {[
+                {
+                  title: 'Complimentary Gift Packaging',
+                  desc: 'Each piece arrives in our signature box',
+                },
+                {
+                  title: 'Lifetime Warranty',
+                  desc: 'Guaranteed craftsmanship and quality',
+                },
+                {
+                  title: 'Free Shipping',
+                  desc: 'Complimentary delivery on all orders',
+                },
+              ].map((item, i) => (
+                <div key={i} className="flex items-start space-x-3">
+                  <Check className="w-5 h-5 text-white flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-white font-light mb-1">{item.title}</p>
+                    <p className="text-zinc-500 text-sm">{item.desc}</p>
+                  </div>
                 </div>
-              </div>
-              <div className="flex items-start space-x-3">
-                <Check className="w-5 h-5 text-white flex-shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-white font-light mb-1">
-                    Lifetime Warranty
-                  </p>
-                  <p className="text-zinc-500 text-sm">
-                    Guaranteed craftsmanship and quality
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-start space-x-3">
-                <Check className="w-5 h-5 text-white flex-shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-white font-light mb-1">
-                    Free Shipping
-                  </p>
-                  <p className="text-zinc-500 text-sm">
-                    Complimentary delivery on all orders
-                  </p>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
         </div>

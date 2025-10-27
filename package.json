@@ -2,6 +2,7 @@
   "dependencies": {
     "@types/react-router-dom": "^5.3.3",
     "lucide-react": "^0.548.0",
-    "react-router-dom": "^7.9.4"
+    "react-router-dom": "^7.9.4",
+    "react-toastify": "^11.0.5"
   }
 }
