@@ -179,22 +179,6 @@ export default function ProductDetailPage({
               </p>
             </div>
 
-            <div className="border-t border-b border-zinc-800 py-6">
-              <h3 className="text-zinc-400 text-sm tracking-wider mb-3">
-                MATERIALS
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                {product.materials.map((material, index) => (
-                  <span
-                    key={index}
-                    className="bg-zinc-950 border border-zinc-800 px-4 py-2 text-white tracking-wide"
-                  >
-                    {material}
-                  </span>
-                ))}
-              </div>
-            </div>
-
             {/* Quantity and buttons */}
             <div>
               <h3 className="text-zinc-400 text-sm tracking-wider mb-3">

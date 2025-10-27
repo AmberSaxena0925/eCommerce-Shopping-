@@ -9,7 +9,6 @@ interface Product {
   description: string;
   price: number;
   images: string[];
-  materials: string[];
   in_stock: boolean;
   category?: string;
 }
@@ -270,16 +269,6 @@ export default function ProductsPage({
                           <span className="text-xl text-white tracking-wider">
                             ${product.price.toLocaleString()}
                           </span>
-                          <div className="flex gap-1">
-                            {product.materials.slice(0, 2).map((material, i) => (
-                              <span
-                                key={i}
-                                className="text-xs text-zinc-600 border border-zinc-800 px-2 py-1"
-                              >
-                                {material}
-                              </span>
-                            ))}
-                          </div>
                         </div>
                       </div>
                     </div>

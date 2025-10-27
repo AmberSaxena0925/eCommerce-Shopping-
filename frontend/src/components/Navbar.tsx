@@ -31,7 +31,7 @@ export default function Navbar({ cartCount, onCartClick, onAuthClick, onContactC
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between">
-          <div className="text-2xl font-light tracking-widest text-white">
+          <div className="text-2xl font-light tracking-widest text-white"             >
             SAI NAMAN PEARLS
           </div>
 

@@ -11,7 +11,7 @@ export default function Hero() {
   }, []);
 
   return (
-    <section className="relative h-screen flex items-center justify-center overflow-hidden bg-neutral-950">
+    <section id="hero" className="relative h-screen flex items-center justify-center overflow-hidden bg-neutral-950">
       {/* Parallax gradient background */}
       <div
         className="absolute inset-0 bg-gradient-radial from-neutral-900 via-neutral-950 to-black"
@@ -28,10 +28,6 @@ export default function Hero() {
       <div className="relative z-10 text-center px-4 animate-fade-in">
         {/* ✅ Logo with glowing white background */}
         <div className="relative inline-block mx-auto mb-6 animate-slide-up">
-          {/* glowing white background */}
-          {/* <div className="absolute inset-0 bg-white/20 blur-3xl rounded-full animate-pulse-slow"></div> */}
-
-          {/* actual logo */}
           <img
             src="/Logo2.png"
             alt="NOIR Logo"
