@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowLeft, CreditCard, Package, Check } from 'lucide-react';
+import { ArrowLeft, CreditCard, Package, Check, Smartphone, Banknote, Wallet } from 'lucide-react';
 import { Product } from '../types';
 
 interface CartItem extends Product {
@@ -12,12 +12,26 @@ interface CheckoutPageProps {
   onOrderComplete: (orderId: string) => void;
 }
 
+interface PaymentOption {
+  id: string;
+  label: string;
+  icon: JSX.Element;
+}
+
+const paymentOptions: PaymentOption[] = [
+  { id: 'card', label: 'Credit / Debit Card', icon: <CreditCard className="w-5 h-5 text-blue-500" /> },
+  { id: 'upi', label: 'UPI Payment', icon: <Smartphone className="w-5 h-5 text-green-500" /> },
+  { id: 'netbanking', label: 'Net Banking', icon: <Banknote className="w-5 h-5 text-yellow-500" /> },
+  { id: 'wallet', label: 'Wallets', icon: <Wallet className="w-5 h-5 text-purple-500" /> },
+];
+
 export default function CheckoutPage({
   items,
   onBack,
   onOrderComplete,
 }: CheckoutPageProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedPayment, setSelectedPayment] = useState<string>('card');
   const [formData, setFormData] = useState({
     customerName: '',
     customerEmail: '',
@@ -25,7 +39,7 @@ export default function CheckoutPage({
     shippingAddress: '',
     city: '',
     postalCode: '',
-    country: 'United States',
+    country: 'India',
   });
 
   const cartItems = items.reduce((acc, item) => {
@@ -51,6 +65,25 @@ export default function CheckoutPage({
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const handlePayment = () => {
+    switch (selectedPayment) {
+      case 'card':
+        alert('Redirecting to Card Payment Gateway...');
+        break;
+      case 'upi':
+        alert('Opening UPI Payment (Google Pay / PhonePe / Paytm)...');
+        break;
+      case 'netbanking':
+        alert('Redirecting to Net Banking page...');
+        break;
+      case 'wallet':
+        alert('Connecting to Wallet...');
+        break;
+      default:
+        alert('Please select a payment option');
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -65,6 +98,7 @@ export default function CheckoutPage({
         postalCode: formData.postalCode,
         country: formData.country,
         totalAmount: total,
+        paymentMethod: selectedPayment,
         items: cartItems.map((item) => ({
           product_id: item.id,
           product_name: item.name,
@@ -83,6 +117,10 @@ export default function CheckoutPage({
       if (!res.ok) throw new Error('Failed to create order');
 
       const json = await res.json();
+
+      // Simulate payment process after order creation
+      handlePayment();
+
       onOrderComplete(json.id);
     } catch (error) {
       console.error('Error creating order:', error);
@@ -118,6 +156,7 @@ export default function CheckoutPage({
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-6">
+                {/* SHIPPING FORM FIELDS */}
                 <div>
                   <label className="block text-zinc-400 text-sm mb-2 tracking-wider">
                     FULL NAME
@@ -213,14 +252,40 @@ export default function CheckoutPage({
                     onChange={handleChange}
                     className="w-full bg-black border border-zinc-800 px-4 py-3 text-white focus:border-white focus:outline-none transition-colors"
                   >
-                    <option value="United States">India</option>
-                    {/* <option value="Canada">Canada</option>
-                    <option value="United Kingdom">United Kingdom</option>
-                    <option value="Australia">Australia</option> */}
+                    <option value="India">India</option>
                   </select>
                 </div>
 
-                <div className="pt-6">
+                {/* PAYMENT OPTIONS SECTION */}
+                <div className="pt-8">
+                  <h3 className="text-xl text-white mb-4 tracking-wider">SELECT PAYMENT METHOD</h3>
+                  <div className="space-y-3">
+                    {paymentOptions.map((option) => (
+                      <div
+                        key={option.id}
+                        className={`flex items-center justify-between border p-4 rounded-lg cursor-pointer transition-all ${
+                          selectedPayment === option.id
+                            ? 'border-blue-600 bg-blue-950/30'
+                            : 'border-zinc-800 hover:bg-zinc-900'
+                        }`}
+                        onClick={() => setSelectedPayment(option.id)}
+                      >
+                        <div className="flex items-center space-x-3">
+                          {option.icon}
+                          <span className="text-zinc-200">{option.label}</span>
+                        </div>
+                        <input
+                          type="radio"
+                          checked={selectedPayment === option.id}
+                          onChange={() => setSelectedPayment(option.id)}
+                          className="accent-blue-600"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="pt-8">
                   <button
                     type="submit"
                     disabled={isSubmitting}
@@ -234,6 +299,7 @@ export default function CheckoutPage({
             </div>
           </div>
 
+          {/* ORDER SUMMARY */}
           <div className="space-y-6">
             <div className="bg-zinc-950 border border-zinc-800 p-8">
               <h2 className="text-2xl font-light tracking-wider text-white mb-6">
