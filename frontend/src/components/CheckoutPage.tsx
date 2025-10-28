@@ -40,6 +40,7 @@ export default function CheckoutPage({
     city: '',
     postalCode: '',
     country: 'India',
+    upiId: '', // 👈 new field added
   });
 
   const cartItems = items.reduce((acc, item) => {
@@ -71,7 +72,7 @@ export default function CheckoutPage({
         alert('Redirecting to Card Payment Gateway...');
         break;
       case 'upi':
-        alert('Opening UPI Payment (Google Pay / PhonePe / Paytm)...');
+        alert(`Opening UPI Payment for ID: ${formData.upiId}`);
         break;
       case 'netbanking':
         alert('Redirecting to Net Banking page...');
@@ -88,6 +89,13 @@ export default function CheckoutPage({
     e.preventDefault();
     setIsSubmitting(true);
 
+    // Optional: basic UPI ID validation
+    if (selectedPayment === 'upi' && !/^[\w.-]+@[\w.-]+$/.test(formData.upiId)) {
+      alert('Please enter a valid UPI ID (e.g., name@bank)');
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
       const body = {
         customerName: formData.customerName,
@@ -97,6 +105,7 @@ export default function CheckoutPage({
         city: formData.city,
         postalCode: formData.postalCode,
         country: formData.country,
+        upiId: formData.upiId, // 👈 include UPI ID in order
         totalAmount: total,
         paymentMethod: selectedPayment,
         items: cartItems.map((item) => ({
@@ -118,9 +127,7 @@ export default function CheckoutPage({
 
       const json = await res.json();
 
-      // Simulate payment process after order creation
       handlePayment();
-
       onOrderComplete(json.id);
     } catch (error) {
       console.error('Error creating order:', error);
@@ -131,7 +138,7 @@ export default function CheckoutPage({
   };
 
   return (
-    <div className="min-h-screen bg-black py-12">
+    <div className="min-h-screen bg-black px-4 py-12 pt-32">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <button
           onClick={onBack}
@@ -283,6 +290,24 @@ export default function CheckoutPage({
                       </div>
                     ))}
                   </div>
+
+                  {/* 👇 UPI ID input appears dynamically */}
+                  {selectedPayment === 'upi' && (
+                    <div className="mt-6 transition-all duration-300 ease-in-out">
+                      <label className="block text-zinc-400 text-sm mb-2 tracking-wider">
+                        ENTER YOUR UPI ID
+                      </label>
+                      <input
+                        type="text"
+                        name="upiId"
+                        value={formData.upiId}
+                        onChange={handleChange}
+                        placeholder="example@upi"
+                        required
+                        className="w-full bg-black border border-zinc-800 px-4 py-3 text-white focus:border-green-500 focus:outline-none transition-colors"
+                      />
+                    </div>
+                  )}
                 </div>
 
                 <div className="pt-8">
@@ -316,9 +341,7 @@ export default function CheckoutPage({
                     />
                     <div className="flex-1">
                       <h3 className="text-white font-light">{item.name}</h3>
-                      <p className="text-zinc-500 text-sm">
-                        Qty: {item.quantity}
-                      </p>
+                      <p className="text-zinc-500 text-sm">Qty: {item.quantity}</p>
                       <p className="text-white mt-1">
                         ${(item.price * item.quantity).toLocaleString()}
                       </p>
@@ -347,8 +370,7 @@ export default function CheckoutPage({
               <div className="flex items-start space-x-3 text-sm text-zinc-400">
                 <Check className="w-5 h-5 text-white flex-shrink-0 mt-0.5" />
                 <p>
-                  All pieces are carefully packaged in our signature gift box
-                  with authenticity certificate
+                  All pieces are carefully packaged in our signature gift box with authenticity certificate
                 </p>
               </div>
             </div>
