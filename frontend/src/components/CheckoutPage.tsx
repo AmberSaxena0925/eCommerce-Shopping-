@@ -7,6 +7,10 @@ import {
   Smartphone,
 } from 'lucide-react';
 import { Product } from '../types';
+import { useEffect } from 'react';
+
+
+
 
 interface CartItem extends Product {
   quantity: number;
@@ -50,6 +54,13 @@ export default function CheckoutPage({
     cardCvv: '',
   });
 
+  useEffect(() => {
+  const script = document.createElement('script');
+  script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+  script.async = true;
+  document.body.appendChild(script);
+}, []);
+
   const cartItems = items.reduce((acc, item) => {
     const existing = acc.find((i) => i.id === item.id);
     if (existing) existing.quantity += 1;
@@ -70,6 +81,9 @@ export default function CheckoutPage({
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
   const handlePayment = () => {
     switch (selectedPayment) {
       case 'card':
@@ -84,6 +98,59 @@ export default function CheckoutPage({
         alert('Please select a payment option');
     }
   };
+=======
+=======
+>>>>>>> Stashed changes
+=======
+>>>>>>> Stashed changes
+const handlePayment = async () => {
+  try {
+    // 1️⃣ Create order via your backend
+    const res = await fetch('http://localhost:5001/api/payment/order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ amount: totalAmount }), // amount in rupees
+    });
+
+    const order = await res.json();
+    console.log('Order created:', order);
+
+    // 2️⃣ Open Razorpay checkout
+    const options = {
+      key: import.meta.env.VITE_RAZORPAY_KEY_ID, // only the public key here
+      amount: order.amount,
+      currency: order.currency,
+      name: 'Your Shop Name',
+      description: 'Test Transaction',
+      order_id: order.id,
+      handler: function (response: any) {
+        console.log('Payment successful:', response);
+        alert('Payment successful!');
+      },
+      prefill: {
+        name: 'Test User',
+        email: 'test@example.com',
+        contact: '9999999999'
+      },
+      theme: { color: '#121212' },
+    };
+
+    const rzp = new (window as any).Razorpay(options);
+    rzp.open();
+  } catch (err) {
+    console.error('Payment error:', err);
+    alert('Payment failed');
+  }
+};
+
+
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
+>>>>>>> Stashed changes
+=======
+>>>>>>> Stashed changes
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -125,7 +192,14 @@ export default function CheckoutPage({
       if (!res.ok) throw new Error('Failed to create order');
 
       const json = await res.json();
+<<<<<<< Updated upstream
       handlePayment();
+=======
+
+      // Simulate payment process after order creation
+      handlePayment(total, json.id);
+
+>>>>>>> Stashed changes
       onOrderComplete(json.id);
     } catch (error) {
       console.error('Error creating order:', error);
