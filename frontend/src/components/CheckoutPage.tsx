@@ -313,7 +313,7 @@ export default function CheckoutPage({
                         Qty: {item.quantity}
                       </p>
                       <p className="text-white mt-1">
-                        ${(item.price * item.quantity).toLocaleString()}
+                        ₹ {(item.price * item.quantity).toLocaleString()}
                       </p>
                     </div>
                   </div>
@@ -323,16 +323,16 @@ export default function CheckoutPage({
               <div className="space-y-3 text-zinc-400">
                 <div className="flex justify-between">
                   <span>Subtotal</span>
-                  <span>${subtotal.toLocaleString()}</span>
+                  <span>₹ {subtotal.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Shipping</span>
-                  <span>${shipping}</span>
+                  <span>₹ {shipping}</span>
                 </div>
                 <div className="flex justify-between text-white text-xl pt-3 border-t border-zinc-800">
                   <span className="tracking-wider">TOTAL</span>
                   <span className="tracking-wider">
-                    ${total.toLocaleString()}
+                    ₹ {total.toLocaleString()}
                   </span>
                 </div>
               </div>
