@@ -81,34 +81,7 @@ export default function CheckoutPage({
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-  const handlePayment = () => {
-    switch (selectedPayment) {
-      case 'card':
-        alert(
-          `Processing Card Payment: **** **** **** ${formData.cardNumber.slice(-4)}`
-        );
-        break;
-      case 'upi':
-        alert(`Opening UPI Payment for ID: ${formData.upiId}`);
-        break;
-      default:
-        alert('Please select a payment option');
-    }
-  };
-=======
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
+
 const handlePayment = async () => {
   try {
     // 1️⃣ Create order via your backend
@@ -150,19 +123,7 @@ const handlePayment = async () => {
 };
 
 
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -204,14 +165,14 @@ const handlePayment = async () => {
       if (!res.ok) throw new Error('Failed to create order');
 
       const json = await res.json();
-<<<<<<< Updated upstream
+
       handlePayment();
-=======
+
 
       // Simulate payment process after order creation
       handlePayment(total, json.id);
 
->>>>>>> Stashed changes
+
       onOrderComplete(json.id);
     } catch (error) {
       console.error('Error creating order:', error);
