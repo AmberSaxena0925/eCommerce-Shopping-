@@ -83,6 +83,7 @@ export default function CheckoutPage({
 
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
   const handlePayment = () => {
     switch (selectedPayment) {
       case 'card':
@@ -98,6 +99,8 @@ export default function CheckoutPage({
     }
   };
 =======
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
 const handlePayment = async () => {
@@ -142,6 +145,9 @@ const handlePayment = async () => {
 
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
