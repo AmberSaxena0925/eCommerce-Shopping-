@@ -213,10 +213,10 @@ export default function CheckoutPage({
                     onChange={handleChange}
                     className="w-full bg-black border border-zinc-800 px-4 py-3 text-white focus:border-white focus:outline-none transition-colors"
                   >
-                    <option value="United States">United States</option>
-                    <option value="Canada">Canada</option>
+                    <option value="United States">India</option>
+                    {/* <option value="Canada">Canada</option>
                     <option value="United Kingdom">United Kingdom</option>
-                    <option value="Australia">Australia</option>
+                    <option value="Australia">Australia</option> */}
                   </select>
                 </div>
 
