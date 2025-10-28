@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import {
-  ArrowLeft,
   CreditCard,
   Package,
   Check,
@@ -18,7 +17,6 @@ interface CartItem extends Product {
 
 interface CheckoutPageProps {
   items: Product[];
-  onBack: () => void;
   onOrderComplete: (orderId: string) => void;
 }
 
@@ -35,7 +33,6 @@ const paymentOptions: PaymentOption[] = [
 
 export default function CheckoutPage({
   items,
-  onBack,
   onOrderComplete,
 }: CheckoutPageProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -122,9 +119,6 @@ const handlePayment = async () => {
   }
 };
 
-
-
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -169,7 +163,6 @@ const handlePayment = async () => {
       handlePayment();
 
 
-      // Simulate payment process after order creation
       handlePayment(total, json.id);
 
 
@@ -185,14 +178,6 @@ const handlePayment = async () => {
   return (
     <div className="min-h-screen bg-black px-4 py-12 pt-32">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <button
-          onClick={onBack}
-          className="flex items-center space-x-2 text-zinc-400 hover:text-white transition-colors mb-8"
-        >
-          <ArrowLeft className="w-5 h-5" />
-          <span className="tracking-wider">BACK TO BAG</span>
-        </button>
-
         <h1 className="text-5xl font-light tracking-widest text-white mb-12 text-center">
           CHECKOUT
         </h1>
