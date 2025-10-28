@@ -1,5 +1,11 @@
 import { useState } from 'react';
-import { ArrowLeft, CreditCard, Package, Check, Smartphone, Banknote, Wallet } from 'lucide-react';
+import {
+  ArrowLeft,
+  CreditCard,
+  Package,
+  Check,
+  Smartphone,
+} from 'lucide-react';
 import { Product } from '../types';
 
 interface CartItem extends Product {
@@ -21,8 +27,6 @@ interface PaymentOption {
 const paymentOptions: PaymentOption[] = [
   { id: 'card', label: 'Credit / Debit Card', icon: <CreditCard className="w-5 h-5 text-blue-500" /> },
   { id: 'upi', label: 'UPI Payment', icon: <Smartphone className="w-5 h-5 text-green-500" /> },
-  { id: 'netbanking', label: 'Net Banking', icon: <Banknote className="w-5 h-5 text-yellow-500" /> },
-  { id: 'wallet', label: 'Wallets', icon: <Wallet className="w-5 h-5 text-purple-500" /> },
 ];
 
 export default function CheckoutPage({
@@ -40,16 +44,16 @@ export default function CheckoutPage({
     city: '',
     postalCode: '',
     country: 'India',
-    upiId: '', // 👈 new field added
+    upiId: '',
+    cardNumber: '',
+    cardExpiry: '',
+    cardCvv: '',
   });
 
   const cartItems = items.reduce((acc, item) => {
     const existing = acc.find((i) => i.id === item.id);
-    if (existing) {
-      existing.quantity += 1;
-    } else {
-      acc.push({ ...item, quantity: 1 });
-    }
+    if (existing) existing.quantity += 1;
+    else acc.push({ ...item, quantity: 1 });
     return acc;
   }, [] as CartItem[]);
 
@@ -69,16 +73,12 @@ export default function CheckoutPage({
   const handlePayment = () => {
     switch (selectedPayment) {
       case 'card':
-        alert('Redirecting to Card Payment Gateway...');
+        alert(
+          `Processing Card Payment: **** **** **** ${formData.cardNumber.slice(-4)}`
+        );
         break;
       case 'upi':
         alert(`Opening UPI Payment for ID: ${formData.upiId}`);
-        break;
-      case 'netbanking':
-        alert('Redirecting to Net Banking page...');
-        break;
-      case 'wallet':
-        alert('Connecting to Wallet...');
         break;
       default:
         alert('Please select a payment option');
@@ -89,23 +89,22 @@ export default function CheckoutPage({
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Optional: basic UPI ID validation
+    // Basic validation
     if (selectedPayment === 'upi' && !/^[\w.-]+@[\w.-]+$/.test(formData.upiId)) {
       alert('Please enter a valid UPI ID (e.g., name@bank)');
       setIsSubmitting(false);
       return;
     }
 
+    if (selectedPayment === 'card' && formData.cardNumber.length < 12) {
+      alert('Please enter a valid card number');
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
       const body = {
-        customerName: formData.customerName,
-        customerEmail: formData.customerEmail,
-        customerPhone: formData.customerPhone,
-        shippingAddress: formData.shippingAddress,
-        city: formData.city,
-        postalCode: formData.postalCode,
-        country: formData.country,
-        upiId: formData.upiId, // 👈 include UPI ID in order
+        ...formData,
         totalAmount: total,
         paymentMethod: selectedPayment,
         items: cartItems.map((item) => ({
@@ -126,7 +125,6 @@ export default function CheckoutPage({
       if (!res.ok) throw new Error('Failed to create order');
 
       const json = await res.json();
-
       handlePayment();
       onOrderComplete(json.id);
     } catch (error) {
@@ -163,96 +161,25 @@ export default function CheckoutPage({
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-6">
-                {/* SHIPPING FORM FIELDS */}
-                <div>
-                  <label className="block text-zinc-400 text-sm mb-2 tracking-wider">
-                    FULL NAME
-                  </label>
-                  <input
-                    type="text"
-                    name="customerName"
-                    value={formData.customerName}
-                    onChange={handleChange}
-                    required
-                    className="w-full bg-black border border-zinc-800 px-4 py-3 text-white focus:border-white focus:outline-none transition-colors"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-zinc-400 text-sm mb-2 tracking-wider">
-                    EMAIL
-                  </label>
-                  <input
-                    type="email"
-                    name="customerEmail"
-                    value={formData.customerEmail}
-                    onChange={handleChange}
-                    required
-                    className="w-full bg-black border border-zinc-800 px-4 py-3 text-white focus:border-white focus:outline-none transition-colors"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-zinc-400 text-sm mb-2 tracking-wider">
-                    PHONE
-                  </label>
-                  <input
-                    type="tel"
-                    name="customerPhone"
-                    value={formData.customerPhone}
-                    onChange={handleChange}
-                    className="w-full bg-black border border-zinc-800 px-4 py-3 text-white focus:border-white focus:outline-none transition-colors"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-zinc-400 text-sm mb-2 tracking-wider">
-                    ADDRESS
-                  </label>
-                  <input
-                    type="text"
-                    name="shippingAddress"
-                    value={formData.shippingAddress}
-                    onChange={handleChange}
-                    required
-                    className="w-full bg-black border border-zinc-800 px-4 py-3 text-white focus:border-white focus:outline-none transition-colors"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
+                {/* SHIPPING FORM */}
+                {['customerName', 'customerEmail', 'customerPhone', 'shippingAddress', 'city', 'postalCode'].map((field) => (
+                  <div key={field}>
                     <label className="block text-zinc-400 text-sm mb-2 tracking-wider">
-                      CITY
+                      {field.replace('customer', '').replace(/([A-Z])/g, ' $1').toUpperCase()}
                     </label>
                     <input
-                      type="text"
-                      name="city"
-                      value={formData.city}
+                      type={field === 'customerEmail' ? 'email' : 'text'}
+                      name={field}
+                      value={(formData as any)[field]}
                       onChange={handleChange}
                       required
                       className="w-full bg-black border border-zinc-800 px-4 py-3 text-white focus:border-white focus:outline-none transition-colors"
                     />
                   </div>
-
-                  <div>
-                    <label className="block text-zinc-400 text-sm mb-2 tracking-wider">
-                      POSTAL CODE
-                    </label>
-                    <input
-                      type="text"
-                      name="postalCode"
-                      value={formData.postalCode}
-                      onChange={handleChange}
-                      required
-                      className="w-full bg-black border border-zinc-800 px-4 py-3 text-white focus:border-white focus:outline-none transition-colors"
-                    />
-                  </div>
-                </div>
+                ))}
 
                 <div>
-                  <label className="block text-zinc-400 text-sm mb-2 tracking-wider">
-                    COUNTRY
-                  </label>
+                  <label className="block text-zinc-400 text-sm mb-2 tracking-wider">COUNTRY</label>
                   <select
                     name="country"
                     value={formData.country}
@@ -263,9 +190,11 @@ export default function CheckoutPage({
                   </select>
                 </div>
 
-                {/* PAYMENT OPTIONS SECTION */}
+                {/* PAYMENT OPTIONS */}
                 <div className="pt-8">
-                  <h3 className="text-xl text-white mb-4 tracking-wider">SELECT PAYMENT METHOD</h3>
+                  <h3 className="text-xl text-white mb-4 tracking-wider">
+                    SELECT PAYMENT METHOD
+                  </h3>
                   <div className="space-y-3">
                     {paymentOptions.map((option) => (
                       <div
@@ -291,18 +220,55 @@ export default function CheckoutPage({
                     ))}
                   </div>
 
-                  {/* 👇 UPI ID input appears dynamically */}
+                  {/* Dynamic Inputs */}
+                  {selectedPayment === 'card' && (
+                    <div className="mt-6 space-y-4">
+                      <label className="block text-zinc-400 text-sm tracking-wider">
+                        CARD DETAILS
+                      </label>
+                      <input
+                        type="text"
+                        name="cardNumber"
+                        placeholder="Card Number"
+                        value={formData.cardNumber}
+                        onChange={handleChange}
+                        required
+                        className="w-full bg-black border border-zinc-800 px-4 py-3 text-white focus:border-blue-500 focus:outline-none transition-colors"
+                      />
+                      <div className="grid grid-cols-2 gap-4">
+                        <input
+                          type="text"
+                          name="cardExpiry"
+                          placeholder="MM/YY"
+                          value={formData.cardExpiry}
+                          onChange={handleChange}
+                          required
+                          className="w-full bg-black border border-zinc-800 px-4 py-3 text-white focus:border-blue-500 focus:outline-none transition-colors"
+                        />
+                        <input
+                          type="password"
+                          name="cardCvv"
+                          placeholder="CVV"
+                          value={formData.cardCvv}
+                          onChange={handleChange}
+                          required
+                          className="w-full bg-black border border-zinc-800 px-4 py-3 text-white focus:border-blue-500 focus:outline-none transition-colors"
+                        />
+                      </div>
+                    </div>
+                  )}
+
                   {selectedPayment === 'upi' && (
-                    <div className="mt-6 transition-all duration-300 ease-in-out">
+                    <div className="mt-6">
                       <label className="block text-zinc-400 text-sm mb-2 tracking-wider">
                         ENTER YOUR UPI ID
                       </label>
                       <input
                         type="text"
                         name="upiId"
+                        placeholder="example@upi"
                         value={formData.upiId}
                         onChange={handleChange}
-                        placeholder="example@upi"
                         required
                         className="w-full bg-black border border-zinc-800 px-4 py-3 text-white focus:border-green-500 focus:outline-none transition-colors"
                       />
@@ -317,7 +283,9 @@ export default function CheckoutPage({
                     className="w-full bg-white text-black py-4 tracking-widest hover:bg-zinc-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
                   >
                     <CreditCard className="w-5 h-5" />
-                    <span>{isSubmitting ? 'PROCESSING...' : 'PLACE ORDER'}</span>
+                    <span>
+                      {isSubmitting ? 'PROCESSING...' : 'PLACE ORDER'}
+                    </span>
                   </button>
                 </div>
               </form>
@@ -341,7 +309,9 @@ export default function CheckoutPage({
                     />
                     <div className="flex-1">
                       <h3 className="text-white font-light">{item.name}</h3>
-                      <p className="text-zinc-500 text-sm">Qty: {item.quantity}</p>
+                      <p className="text-zinc-500 text-sm">
+                        Qty: {item.quantity}
+                      </p>
                       <p className="text-white mt-1">
                         ${(item.price * item.quantity).toLocaleString()}
                       </p>
@@ -361,7 +331,9 @@ export default function CheckoutPage({
                 </div>
                 <div className="flex justify-between text-white text-xl pt-3 border-t border-zinc-800">
                   <span className="tracking-wider">TOTAL</span>
-                  <span className="tracking-wider">${total.toLocaleString()}</span>
+                  <span className="tracking-wider">
+                    ${total.toLocaleString()}
+                  </span>
                 </div>
               </div>
             </div>
@@ -370,7 +342,8 @@ export default function CheckoutPage({
               <div className="flex items-start space-x-3 text-sm text-zinc-400">
                 <Check className="w-5 h-5 text-white flex-shrink-0 mt-0.5" />
                 <p>
-                  All pieces are carefully packaged in our signature gift box with authenticity certificate
+                  All pieces are carefully packaged in our signature gift box
+                  with authenticity certificate
                 </p>
               </div>
             </div>
