@@ -1,96 +1,119 @@
-// src/App.tsx
 import { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
-import FeaturedCollections from './components/FeaturedCollections';
 import ProductGrid from './components/ProductGrid';
+import FeaturedCollections from './components/FeaturedCollections';
 import About from './components/About';
 import Footer from './components/Footer';
 import CartSidebar from './components/CartSidebar';
-import CheckoutPage from './components/CheckoutPage';
-import OrderConfirmation from './components/OrderConfirmation';
 import AuthModal from './components/AuthModal';
-import ProductDetailPage from './components/ProductDetailPage';
 import ContactPage from './components/ContactPage';
 import ProductsPage from './components/ProductsPage';
+import ProductDetailPage from './components/ProductDetailPage';
+import CheckoutPage from './components/CheckoutPage';
+import OrderConfirmation from './components/OrderConfirmation';
 import LoadingScreen from './components/LoadingScreen';
-import { Product } from './types';
+import AdminProductForm from './components/AdminProductForm';
+import AdminCollectionForm from './components/AdminCollectionForm';
 import { useAuth } from './context/AuthContext';
-import axios from 'axios';
 
-// ✅ Import Toastify
-import { ToastContainer, toast, Bounce } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+type View = 'home' | 'contact' | 'products' | 'product-detail' | 'checkout' | 'order-confirmation';
+
+interface Product {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  price: number;
+  images: string[];
+  in_stock: boolean;
+  materials: string[];
+}
 
 interface CartItem extends Product {
   quantity: number;
 }
 
-type View = 'home' | 'checkout' | 'confirmation' | 'product' | 'contact' | 'products';
-
 function App() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  const [isCartOpen, setIsCartOpen] = useState(false);
+  const { user, logout } = useAuth();
   const [currentView, setCurrentView] = useState<View>('home');
-  const [orderId, setOrderId] = useState<string>('');
-  const [selectedProductSlug, setSelectedProductSlug] = useState<string>('');
+  const [isCartOpen, setIsCartOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const { user, token, logout } = useAuth();
+  const [isAdminProductFormOpen, setIsAdminProductFormOpen] = useState(false);
+  const [isAdminCollectionFormOpen, setIsAdminCollectionFormOpen] = useState(false);
+  const [showLoading, setShowLoading] = useState(true);
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [selectedProductSlug, setSelectedProductSlug] = useState<string | null>(null);
+  const [orderId, setOrderId] = useState<string | null>(null);
 
-  // Fetch cart from backend or localStorage
+  // Sync cart with backend when user logs in
   useEffect(() => {
-    const fetchCart = async () => {
-      if (user && token) {
-        try {
-          const response = await axios.get('http://localhost:5001/api/cart', {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          setCartItems(response.data || []);
-        } catch (error) {
-          console.error('Error fetching cart:', error);
-        }
-      } else {
-        const savedCart = localStorage.getItem('guestCart');
-        if (savedCart) setCartItems(JSON.parse(savedCart));
+    if (user) {
+      syncCartWithBackend();
+    }
+  }, [user]);
+
+  const syncCartWithBackend = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const res = await fetch('/api/cart', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        // Transform backend cart to frontend format
+        const items = data.reduce((acc: CartItem[], item: any) => {
+          const existing = acc.find((i) => i.id === item.id);
+          if (existing) {
+            existing.quantity += item.quantity || 1;
+          } else {
+            acc.push({ ...item, quantity: item.quantity || 1 });
+          }
+          return acc;
+        }, []);
+        setCartItems(items);
       }
-    };
-    fetchCart();
-  }, [user, token]);
+    } catch (err) {
+      console.error('Failed to sync cart', err);
+    }
+  };
 
-  // Save guest cart
-  useEffect(() => {
-    if (!user) localStorage.setItem('guestCart', JSON.stringify(cartItems));
-  }, [cartItems, user]);
-
-  // ✅ Add product to cart with Toast
   const handleAddToCart = async (product: Product) => {
-    if (user && token) {
+    if (user) {
+      // If logged in, add to backend
       try {
-        const productId = (product as any)._id || product.id;
-        const response = await axios.post(
-          'http://localhost:5001/api/cart/add',
-          {
-            productId,
+        const token = localStorage.getItem('token');
+        const res = await fetch('/api/cart/add', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            productId: product.id,
             name: product.name,
             price: product.price,
-            images: product.images || [],
-            description: product.description || '',
-            materials: product.materials || [],
-            slug: product.slug || productId,
+            images: product.images,
+            description: product.description,
+            materials: product.materials,
+            slug: product.slug,
             quantity: 1,
-          },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        setCartItems(response.data || []);
-        setIsCartOpen(true);
-        toast.success(`${product.name} added to your cart 🛍️`, { transition: Bounce });
-      } catch (error: any) {
-        console.error('Full error:', error);
-        toast.error(`Failed to add product: ${error.response?.data?.message || error.message}`);
+          }),
+        });
+
+        if (res.ok) {
+          await syncCartWithBackend();
+        }
+      } catch (err) {
+        console.error('Failed to add to cart', err);
       }
     } else {
-      // Guest cart
+      // If not logged in, use local state
       setCartItems((prev) => {
         const existing = prev.find((item) => item.id === product.id);
         if (existing) {
@@ -100,84 +123,128 @@ function App() {
         }
         return [...prev, { ...product, quantity: 1 }];
       });
-      setIsCartOpen(true);
-      toast.success(`${product.name} added to your bag 🛍️`, { transition: Bounce });
     }
   };
 
-  // ✅ Update quantity
   const handleUpdateQuantity = async (productId: string, quantity: number) => {
-    if (quantity === 0) {
-      handleRemoveItem(productId);
-      return;
-    }
-    if (user && token) {
+    if (user) {
       try {
-        const response = await axios.post(
-          'http://localhost:5001/api/cart/update',
-          { productId, quantity },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        setCartItems(response.data || []);
-      } catch (error) {
-        console.error('Error updating quantity:', error);
+        const token = localStorage.getItem('token');
+        const res = await fetch('/api/cart/update', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ productId, quantity }),
+        });
+
+        if (res.ok) {
+          await syncCartWithBackend();
+        }
+      } catch (err) {
+        console.error('Failed to update cart', err);
       }
     } else {
-      setCartItems((prev) =>
-        prev.map((item) =>
-          item.id === productId || (item as any)._id === productId ? { ...item, quantity } : item
-        )
-      );
+      if (quantity === 0) {
+        setCartItems((prev) => prev.filter((item) => item.id !== productId));
+      } else {
+        setCartItems((prev) =>
+          prev.map((item) => (item.id === productId ? { ...item, quantity } : item))
+        );
+      }
     }
   };
 
-  // ✅ Remove item from cart with Toast
   const handleRemoveItem = async (productId: string) => {
-    if (user && token) {
+    if (user) {
       try {
-        const response = await axios.post(
-          'http://localhost:5001/api/cart/remove',
-          { productId },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        setCartItems(response.data || []);
-        toast.info('Item removed from cart 🗑️', { transition: Bounce });
-      } catch (error) {
-        console.error('Error removing from cart:', error);
+        const token = localStorage.getItem('token');
+        const res = await fetch('/api/cart/remove', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ productId }),
+        });
+
+        if (res.ok) {
+          await syncCartWithBackend();
+        }
+      } catch (err) {
+        console.error('Failed to remove from cart', err);
       }
     } else {
-      setCartItems((prev) =>
-        prev.filter((item) => item.id !== productId && (item as any)._id !== productId)
-      );
-      toast.info('Item removed 🗑️', { transition: Bounce });
+      setCartItems((prev) => prev.filter((item) => item.id !== productId));
     }
-  };
-
-  // ✅ Other handlers
-  const handleViewProduct = (slug: string) => {
-    setSelectedProductSlug(slug);
-    setCurrentView('product');
   };
 
   const handleCheckout = () => {
-    setIsCartOpen(false);
+    if (!user) {
+      setIsAuthModalOpen(true);
+      return;
+    }
     setCurrentView('checkout');
+    setIsCartOpen(false);
   };
 
-  const handleOrderComplete = (newOrderId: string) => {
+  const handleOrderComplete = async (newOrderId: string) => {
     setOrderId(newOrderId);
-    setCurrentView('confirmation');
+    setCurrentView('order-confirmation');
     setCartItems([]);
-    if (!user) localStorage.removeItem('guestCart');
-    toast.success('🎉 Order placed successfully!', { transition: Bounce });
+    
+    // Clear backend cart if user is logged in
+    if (user) {
+      try {
+        const token = localStorage.getItem('token');
+        await fetch('/api/cart/clear', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+      } catch (err) {
+        console.error('Failed to clear cart', err);
+      }
+    }
+  };
+
+  const handleViewProduct = (slug: string) => {
+    setSelectedProductSlug(slug);
+    setCurrentView('product-detail');
   };
 
   const handleBackToHome = () => {
     setCurrentView('home');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setSelectedProductSlug(null);
+    setOrderId(null);
   };
 
-  if (isLoading) return <LoadingScreen onComplete={() => setIsLoading(false)} />;
+  const handleLogout = () => {
+    logout();
+    setCartItems([]);
+    setCurrentView('home');
+  };
+
+  const handleAdminProductSuccess = () => {
+    // Refresh products if needed
+    console.log('Product created successfully!');
+  };
+
+  const handleAdminCollectionSuccess = () => {
+    // Refresh collections if needed
+    console.log('Collection created successfully!');
+  };
+
+  // Convert cartItems for display (flatten duplicates)
+  const cartItemsForCheckout = cartItems.flatMap((item) =>
+    Array(item.quantity).fill({ ...item, quantity: 1 })
+  );
+
+  if (showLoading) {
+    return <LoadingScreen onComplete={() => setShowLoading(false)} />;
+  }
 
   return (
     <div className="min-h-screen bg-black">
@@ -185,17 +252,54 @@ function App() {
         cartCount={cartItems.reduce((sum, item) => sum + item.quantity, 0)}
         onCartClick={() => setIsCartOpen(true)}
         onAuthClick={() => setIsAuthModalOpen(true)}
-        onHomeClick={handleBackToHome}
-        onProductsClick={() => setCurrentView('products')}
         onContactClick={() => setCurrentView('contact')}
+        onProductsClick={() => setCurrentView('products')}
+        onAdminAddProduct={() => setIsAdminProductFormOpen(true)}
+        onAdminAddCollection={() => setIsAdminCollectionFormOpen(true)}
         user={user}
-        onLogout={logout}
+        onLogout={handleLogout}
       />
 
-      {/* Auth modal */}
-      <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
+      {currentView === 'home' && (
+        <>
+          <Hero />
+          <FeaturedCollections />
+          <ProductGrid onAddToCart={handleAddToCart} onViewProduct={handleViewProduct} />
+          <About />
+          <Footer onContactClick={() => setCurrentView('contact')} />
+        </>
+      )}
 
-      {/* Cart sidebar */}
+      {currentView === 'contact' && <ContactPage onBack={handleBackToHome} />}
+
+      {currentView === 'products' && (
+        <ProductsPage
+          onBack={handleBackToHome}
+          onViewProduct={handleViewProduct}
+          onAddToCart={handleAddToCart}
+        />
+      )}
+
+      {currentView === 'product-detail' && selectedProductSlug && (
+        <ProductDetailPage
+          productSlug={selectedProductSlug}
+          onBack={handleBackToHome}
+          onAddToCart={handleAddToCart}
+        />
+      )}
+
+      {currentView === 'checkout' && (
+        <CheckoutPage
+          items={cartItemsForCheckout}
+          onBack={() => setIsCartOpen(true)}
+          onOrderComplete={handleOrderComplete}
+        />
+      )}
+
+      {currentView === 'order-confirmation' && orderId && (
+        <OrderConfirmation orderId={orderId} onBackToHome={handleBackToHome} />
+      )}
+
       <CartSidebar
         isOpen={isCartOpen}
         onClose={() => setIsCartOpen(false)}
@@ -205,46 +309,22 @@ function App() {
         onRemoveItem={handleRemoveItem}
       />
 
-      {/* Page content */}
-      {currentView === 'home' && (
-        <>
-          <Hero />
-          <FeaturedCollections />
-          <ProductGrid onAddToCart={handleAddToCart} onViewProduct={handleViewProduct} />
-          <About />
-        </>
-      )}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        initialMode="login"
+      />
 
-      {currentView === 'products' && (
-        <ProductsPage onBack={handleBackToHome} onViewProduct={handleViewProduct} onAddToCart={handleAddToCart} />
-      )}
+      <AdminProductForm
+        isOpen={isAdminProductFormOpen}
+        onClose={() => setIsAdminProductFormOpen(false)}
+        onSuccess={handleAdminProductSuccess}
+      />
 
-      {currentView === 'product' && (
-        <ProductDetailPage productSlug={selectedProductSlug} onBack={handleBackToHome} onAddToCart={handleAddToCart} />
-      )}
-
-      {currentView === 'checkout' && (
-        <CheckoutPage items={cartItems} onBack={handleBackToHome} onOrderComplete={handleOrderComplete} />
-      )}
-
-      {currentView === 'confirmation' && <OrderConfirmation orderId={orderId} onBackToHome={handleBackToHome} />}
-
-      {currentView === 'contact' && <ContactPage onBack={handleBackToHome} />}
-
-      {/* Footer */}
-      <Footer onContactClick={() => setCurrentView('contact')} />
-
-      {/* ✅ Toast container (must be at bottom of App) */}
-      <ToastContainer
-        position="top-right"
-        autoClose={2000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        pauseOnHover
-        draggable
-        theme="dark"
-        transition={Bounce}
+      <AdminCollectionForm
+        isOpen={isAdminCollectionFormOpen}
+        onClose={() => setIsAdminCollectionFormOpen(false)}
+        onSuccess={handleAdminCollectionSuccess}
       />
     </div>
   );

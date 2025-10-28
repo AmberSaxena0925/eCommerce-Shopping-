@@ -14,10 +14,14 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-// ✅ 2. BODY PARSER - THIS WAS MISSING!
+// ✅ 2. BODY PARSER (must come BEFORE any routes)
 app.use(express.json());
+app.use(express.urlencoded({ extended: true })); // optional but recommended for form data
 
 // ✅ 3. ROUTES
+const adminRoutes = require('./routes/admin');
+app.use('/api/admin', adminRoutes);
+
 const authRoutes = require('./routes/auth');
 app.use('/api/auth', authRoutes);
 

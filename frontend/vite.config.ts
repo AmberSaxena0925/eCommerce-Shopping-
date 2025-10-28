@@ -4,9 +4,9 @@ import react from '@vitejs/plugin-react';
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  optimizeDeps: {
-    exclude: ['lucide-react'],
-  },
+  // optimizeDeps: {
+  //   exclude: ['lucide-react'],
+  // },
   // Proxy /api requests to backend during development. Set VITE_BACKEND_URL in .env if your backend runs on a different port.
   server: {
     proxy: {

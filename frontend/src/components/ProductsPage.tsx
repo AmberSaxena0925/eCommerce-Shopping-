@@ -11,15 +11,16 @@ interface Product {
   images: string[];
   in_stock: boolean;
   category?: string;
+  category_id?: any;
 }
 
 const categories = [
   { id: 'all', name: 'All Products' },
-  { id: 'earring', name: 'Earring' },
-  { id: 'ring', name: 'Ring' },
-  { id: 'necklace', name: 'Necklace' },
-  { id: 'Pearls Malas', name: 'Pearls Malas' },
-  { id: 'bracelet', name: 'Bracelet' },
+  { id: 'earrings', name: 'Earrings' },
+  { id: 'rings', name: 'Rings' },
+  { id: 'necklaces', name: 'Necklaces' },
+  { id: 'bracelets', name: 'Bracelets' },
+  { id: 'pearls malas', name: 'Pearls Malas' },
 ];
 
 interface ProductsPageProps {
@@ -46,27 +47,73 @@ export default function ProductsPage({
 
   useEffect(() => {
     applyCategoryFilter();
-  }, [selectedCategory]);
+  }, [selectedCategory, allProducts]);
 
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/products');
-      const text = await res.text();
-
+      // Fetch from backend with full URL
+      const res = await fetch('http://localhost:5001/api/products');
+      
       let backendProducts: Product[] = [];
-      if (res.ok && text) {
-        const data = JSON.parse(text);
-        backendProducts = Array.isArray(data) ? data : [];
+      
+      if (res.ok) {
+        const data = await res.json();
+        console.log('Backend all products response:', data);
+        
+        // Handle both array response and paginated response
+        if (Array.isArray(data)) {
+          backendProducts = data;
+        } else if (data.products && Array.isArray(data.products)) {
+          backendProducts = data.products;
+        }
+
+        // Normalize backend products - extract category name from category_id
+        backendProducts = backendProducts.map((p: any) => {
+          // Get category name from various possible structures
+          let categoryName = '';
+          
+          if (p.category) {
+            categoryName = p.category;
+          } else if (p.category_id) {
+            if (typeof p.category_id === 'string') {
+              categoryName = p.category_id;
+            } else if (p.category_id.name) {
+              categoryName = p.category_id.name;
+            } else if (p.category_id.slug) {
+              categoryName = p.category_id.slug;
+            }
+          }
+
+          return {
+            id: p._id || p.id,
+            name: p.name,
+            slug: p.slug,
+            description: p.description || '',
+            price: p.price,
+            images: p.images || [],
+            in_stock: p.in_stock !== undefined ? p.in_stock : true,
+            category: categoryName.toLowerCase(),
+            category_id: p.category_id,
+          };
+        });
+
+        console.log('Normalized backend all products:', backendProducts);
+      } else {
+        console.warn('Backend fetch failed:', res.status);
       }
 
-      const combinedProducts = [...backendProducts, ...localProducts];
-      setAllProducts(combinedProducts);
-      setProducts(combinedProducts);
+      // Combine and deduplicate
+      const combined = [...backendProducts, ...localProducts];
+      const deduped = Array.from(
+        new Map(combined.map((p) => [p.slug, p])).values()
+      );
+
+      console.log('All combined products:', deduped);
+      setAllProducts(deduped);
     } catch (err) {
       console.error('Failed to load products', err);
       setAllProducts(localProducts);
-      setProducts(localProducts);
     } finally {
       setLoading(false);
     }
@@ -76,15 +123,22 @@ export default function ProductsPage({
     if (selectedCategory === 'all') {
       setProducts(allProducts);
     } else {
-      setProducts(
-        allProducts.filter(
-          (p) => p.category?.toLowerCase() === selectedCategory
-        )
-      );
+      const filtered = allProducts.filter((p) => {
+        const productCategory = (p.category || '').toLowerCase().trim();
+        const selectedCat = selectedCategory.toLowerCase().trim();
+        
+        console.log(`Comparing: "${productCategory}" === "${selectedCat}"`, productCategory === selectedCat);
+        
+        return productCategory === selectedCat;
+      });
+      
+      console.log(`Filtered products for category "${selectedCategory}":`, filtered);
+      setProducts(filtered);
     }
   };
 
   const handleCategoryClick = (categoryId: string) => {
+    console.log('Category clicked:', categoryId);
     setSelectedCategory(categoryId);
     setIsMobileFilterOpen(false);
   };
@@ -92,22 +146,21 @@ export default function ProductsPage({
   return (
     <div className="min-h-screen bg-black px-4 py-12 pt-32">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
         <div className="mb-12 animate-fade-in">
           <center>
-          <h1 className="text-6xl font-light tracking-widest text-white mb-4">
-            ALL PRODUCTS
-          </h1>
-          <p className="text-zinc-400 text-lg tracking-wide">
-            Explore our complete collection of fine jewelry
-          </p>
+            <h1 className="text-6xl font-light tracking-widest text-white mb-4">
+              ALL PRODUCTS
+            </h1>
+            <p className="text-zinc-400 text-lg tracking-wide">
+              Explore our complete collection of fine jewelry
+            </p>
           </center>
-  <button
-    onClick={onBack}
-    className="flex justify-end text-zinc-400 hover:text-white transition-colors mb-6 tracking-wider"
-  >
-    ← BACK TO HOME
-  </button>
+          <button
+            onClick={onBack}
+            className="flex justify-end text-zinc-400 hover:text-white transition-colors mb-6 tracking-wider"
+          >
+            ← BACK TO HOME
+          </button>
         </div>
 
         <div className="flex gap-8">
@@ -223,7 +276,6 @@ export default function ProductsPage({
                         animation: `fade-in-up 0.5s ease-out ${index * 0.05}s both`,
                       }}
                     >
-                      {/* Card Content */}
                       <div
                         className="relative aspect-square overflow-hidden cursor-pointer"
                         onClick={() => onViewProduct(product.slug)}
@@ -269,6 +321,11 @@ export default function ProductsPage({
                           <span className="text-xl text-white tracking-wider">
                             ${product.price.toLocaleString()}
                           </span>
+                          {product.category && (
+                            <span className="text-xs text-zinc-600 uppercase">
+                              {product.category}
+                            </span>
+                          )}
                         </div>
                       </div>
                     </div>

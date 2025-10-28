@@ -1,4 +1,4 @@
-import { ShoppingBag, Menu, X, User, LogOut } from 'lucide-react';
+import { ShoppingBag, Menu, X, User, LogOut, Plus } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 interface NavbarProps {
@@ -7,13 +7,32 @@ interface NavbarProps {
   onAuthClick: () => void;
   onContactClick: () => void;
   onProductsClick: () => void;
+  onAdminAddProduct?: () => void;
+  onAdminAddCollection?: () => void;
   user: any;
   onLogout: () => void;
 }
 
-export default function Navbar({ cartCount, onCartClick, onAuthClick, onContactClick, onProductsClick, user, onLogout }: NavbarProps) {
+export default function Navbar({ 
+  cartCount, 
+  onCartClick, 
+  onAuthClick, 
+  onContactClick, 
+  onProductsClick,
+  onAdminAddProduct,
+  onAdminAddCollection,
+  user, 
+  onLogout 
+}: NavbarProps) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [showAdminDropdown, setShowAdminDropdown] = useState(false);
+
+  // Define admin email (you can also use environment variable)
+  const ADMIN_EMAIL = 'akash@gmail.com'; // Change this to your admin email
+  
+  // Check if current user is admin
+  const isAdmin = user && user.email === ADMIN_EMAIL;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -23,6 +42,18 @@ export default function Navbar({ cartCount, onCartClick, onAuthClick, onContactC
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (showAdminDropdown && !(e.target as Element).closest('.admin-dropdown-container')) {
+        setShowAdminDropdown(false);
+      }
+    };
+
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [showAdminDropdown]);
+
   return (
     <nav
       className={`fixed top-0 w-full z-50 transition-all duration-500 ${
@@ -31,7 +62,7 @@ export default function Navbar({ cartCount, onCartClick, onAuthClick, onContactC
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between">
-          <div className="text-2xl font-light tracking-widest text-white"             >
+          <div className="text-2xl font-light tracking-widest text-white">
             SAI NAMAN PEARLS
           </div>
 
@@ -57,6 +88,45 @@ export default function Navbar({ cartCount, onCartClick, onAuthClick, onContactC
                   <User className="w-5 h-5 text-zinc-400" />
                   <span className="text-zinc-400 text-sm font-medium">{user.name}</span>
                 </div>
+
+                {/* Admin Dropdown */}
+                {isAdmin && (
+                  <div className="relative admin-dropdown-container">
+                    <button
+                      onClick={() => setShowAdminDropdown(!showAdminDropdown)}
+                      className="flex items-center space-x-2 bg-zinc-900 text-white px-4 py-2 rounded hover:bg-zinc-800 transition-colors border border-zinc-700"
+                    >
+                      <Plus className="w-4 h-4" />
+                      <span className="text-sm tracking-wide">ADMIN</span>
+                    </button>
+
+                    {showAdminDropdown && (
+                      <div className="absolute right-0 mt-2 w-56 bg-zinc-950 border border-zinc-800 rounded shadow-lg overflow-hidden animate-fade-in">
+                        <button
+                          onClick={() => {
+                            onAdminAddProduct?.();
+                            setShowAdminDropdown(false);
+                          }}
+                          className="w-full text-left px-4 py-3 text-zinc-400 hover:text-white hover:bg-zinc-900 transition-colors flex items-center space-x-2"
+                        >
+                          <Plus className="w-4 h-4" />
+                          <span className="text-sm tracking-wide">Add Product</span>
+                        </button>
+                        <button
+                          onClick={() => {
+                            onAdminAddCollection?.();
+                            setShowAdminDropdown(false);
+                          }}
+                          className="w-full text-left px-4 py-3 text-zinc-400 hover:text-white hover:bg-zinc-900 transition-colors flex items-center space-x-2 border-t border-zinc-800"
+                        >
+                          <Plus className="w-4 h-4" />
+                          <span className="text-sm tracking-wide">Add Collection</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 <button
                   onClick={onLogout}
                   className="text-zinc-400 hover:text-white transition-colors"
@@ -107,10 +177,46 @@ export default function Navbar({ cartCount, onCartClick, onAuthClick, onContactC
             <button onClick={onContactClick} className="text-zinc-400 hover:text-white transition-colors tracking-wide text-left">
               CONTACT
             </button>
+
+            {/* Mobile Admin Menu */}
+            {user && isAdmin && (
+              <>
+                <div className="border-t border-zinc-800 pt-4">
+                  <p className="text-zinc-600 text-xs tracking-wider mb-3">ADMIN</p>
+                  <button 
+                    onClick={() => {
+                      onAdminAddProduct?.();
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="w-full text-left text-zinc-400 hover:text-white transition-colors tracking-wide flex items-center space-x-2 mb-3"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>Add Product</span>
+                  </button>
+                  <button 
+                    onClick={() => {
+                      onAdminAddCollection?.();
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="w-full text-left text-zinc-400 hover:text-white transition-colors tracking-wide flex items-center space-x-2"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>Add Collection</span>
+                  </button>
+                </div>
+              </>
+            )}
+
             {user ? (
-              <button onClick={onLogout} className="text-zinc-400 hover:text-white transition-colors tracking-wide text-left">
-                LOGOUT
-              </button>
+              <>
+                <div className="border-t border-zinc-800 pt-4">
+                  <p className="text-zinc-600 text-xs tracking-wider mb-2">LOGGED IN AS</p>
+                  <p className="text-white text-sm mb-4">{user.name}</p>
+                </div>
+                <button onClick={onLogout} className="text-zinc-400 hover:text-white transition-colors tracking-wide text-left">
+                  LOGOUT
+                </button>
+              </>
             ) : (
               <button onClick={onAuthClick} className="text-zinc-400 hover:text-white transition-colors tracking-wide text-left">
                 LOGIN

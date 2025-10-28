@@ -31,23 +31,55 @@ export default function ProductGrid({ onAddToCart, onViewProduct }: ProductGridP
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/products?featured=true');
-      const text = await res.text();
-
+      // Try to fetch from backend
+      const res = await fetch('http://localhost:5001/api/products?featured=true');
+      
       let backendProducts: Product[] = [];
 
-      if (!res.ok) {
-        console.error('Failed to fetch /api/products', res.status, text);
+      if (res.ok) {
+        const data = await res.json();
+        console.log('Backend products response:', data);
+        
+        // Handle both array response and paginated response
+        if (Array.isArray(data)) {
+          backendProducts = data;
+        } else if (data.products && Array.isArray(data.products)) {
+          backendProducts = data.products;
+        }
+
+        // Normalize backend products to match frontend interface
+        backendProducts = backendProducts.map((p: any) => ({
+          id: p._id || p.id,
+          name: p.name,
+          slug: p.slug,
+          description: p.description || '',
+          price: p.price,
+          images: p.images || [],
+          in_stock: p.in_stock !== undefined ? p.in_stock : true,
+          featured: p.featured || false,
+        }));
+
+        console.log('Normalized backend products:', backendProducts);
       } else {
-        const data = text ? JSON.parse(text) : [];
-        backendProducts = Array.isArray(data) ? data : [];
+        console.warn('Backend fetch failed:', res.status);
       }
 
-      const combined = [...backendProducts, ...localProducts].filter((p) => p.featured);
-      const deduped = Array.from(new Map(combined.map((p) => [p.slug, p])).values());
+      // Combine backend and local products
+      const combined = [...backendProducts, ...localProducts];
+      
+      // Filter for featured products
+      const featured = combined.filter((p) => p.featured);
+      
+      // Deduplicate by slug (prefer backend products)
+      const deduped = Array.from(
+        new Map(featured.map((p) => [p.slug, p])).values()
+      );
+
+      console.log('Final featured products:', deduped);
       setProducts(deduped);
     } catch (err) {
       console.error('Failed to load products', err);
+      // Fallback to local products only
       setProducts(localProducts.filter((p) => p.featured));
     } finally {
       setLoading(false);
@@ -58,7 +90,6 @@ export default function ProductGrid({ onAddToCart, onViewProduct }: ProductGridP
     e.stopPropagation();
     onAddToCart(product);
 
-    // ✅ Toast animation when added to cart
     toast.success(`${product.name} added to your bag! 🛍️`, {
       position: 'top-right',
       autoClose: 2000,
@@ -82,7 +113,6 @@ export default function ProductGrid({ onAddToCart, onViewProduct }: ProductGridP
 
   return (
     <section id="products" className="py-24 bg-zinc-950">
-      {/* ✅ Toast Container */}
       <ToastContainer />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -135,7 +165,6 @@ export default function ProductGrid({ onAddToCart, onViewProduct }: ProductGridP
                   <span className="text-2xl text-white tracking-wider">
                     ${product.price.toLocaleString()}
                   </span>
-
                 </div>
               </div>
             </div>
