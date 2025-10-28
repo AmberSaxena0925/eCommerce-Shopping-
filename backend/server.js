@@ -22,6 +22,10 @@ app.use(express.urlencoded({ extended: true })); // optional but recommended for
 const adminRoutes = require('./routes/admin');
 app.use('/api/admin', adminRoutes);
 
+const paymentRoutes = require('./routes/payment');
+app.use('/api/payment', paymentRoutes);
+
+
 const authRoutes = require('./routes/auth');
 app.use('/api/auth', authRoutes);
 
