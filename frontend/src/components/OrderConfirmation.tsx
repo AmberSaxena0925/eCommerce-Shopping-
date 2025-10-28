@@ -92,7 +92,7 @@ export default function OrderConfirmation({
           <p className="text-zinc-400 text-lg tracking-wide">
             Thank you for your purchase, {order.customer_name}
           </p>
-          <p className="text-zinc-500 mt-2">Order #{order.id.slice(0, 8).toUpperCase()}</p>
+          <p className="text-zinc-500 mt-2">Order #{orderId ? orderId.slice(0, 8) : ""}</p>
         </div>
 
         <div className="grid md:grid-cols-3 gap-6 mb-12">
