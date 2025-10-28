@@ -82,6 +82,7 @@ export default function CheckoutPage({
   };
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
   const handlePayment = () => {
     switch (selectedPayment) {
       case 'card':
@@ -97,6 +98,8 @@ export default function CheckoutPage({
     }
   };
 =======
+=======
+>>>>>>> Stashed changes
 const handlePayment = async () => {
   try {
     // 1️⃣ Create order via your backend
@@ -138,6 +141,9 @@ const handlePayment = async () => {
 };
 
 
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 
   const handleSubmit = async (e: React.FormEvent) => {
