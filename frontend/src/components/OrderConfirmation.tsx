@@ -80,7 +80,7 @@ export default function OrderConfirmation({
   }
 
   return (
-    <div className="min-h-screen bg-black py-12">
+    <div className="min-h-screen bg-black  px-4 py-12 pt-32">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12 animate-fade-in">
           <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-zinc-900 border border-zinc-700 mb-6">
