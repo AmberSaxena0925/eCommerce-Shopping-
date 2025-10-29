@@ -95,7 +95,7 @@ const handlePayment = async () => {
 
     // 2️⃣ Open Razorpay checkout
     const options = {
-      key: import.meta.env.VITE_RAZORPAY_KEY_ID, // only the public key here
+      key:  'rzp_live_ItsoYEscit5gog', // not use the key like this..its just for testing
       amount: order.amount,
       currency: order.currency,
       name: 'Your Shop Name',
