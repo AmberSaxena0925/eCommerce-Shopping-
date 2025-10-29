@@ -1,4 +1,4 @@
-import { Sparkles, Award, Shield } from 'lucide-react';
+ import { Sparkles, Award, Shield } from 'lucide-react';
 
 export default function About() {
   const features = [
@@ -25,19 +25,13 @@ export default function About() {
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           <div className="space-y-8">
             <h2 className="text-5xl font-light tracking-widest text-white mb-6">
-              THE ART OF
-              <br />
-              PERFECTION
+              OUR BRAND STORY.
             </h2>
             <p className="text-zinc-400 text-lg leading-relaxed">
-              For over a century, we have dedicated ourselves to the pursuit of
-              excellence in jewelry design. Each piece tells a story of
-              uncompromising quality, timeless elegance, and the mastery of our
-              craft.
+              Discover the timeless elegance of Sai Naman Pearls, a revered name in the world of pearl jewelry for over 31 years. Our brand stands as a beacon of quality and craftsmanship, offering exquisite pieces that enchant and inspire. Proudly registered with both KVIC and MSME, we blend tradition with innovation, ensuring each creation tells a story of heritage and beauty.
             </p>
             <p className="text-zinc-400 text-lg leading-relaxed">
-              Our creations are more than accessories—they are heirlooms,
-              destined to be cherished for generations.
+               From classic strands to contemporary designs, Sai Naman Pearls celebrates the essence of femininity and sophistication, making every piece a cherished treasure for generations to come.
             </p>
           </div>
 
