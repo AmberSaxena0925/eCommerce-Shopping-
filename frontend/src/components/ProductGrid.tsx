@@ -11,6 +11,7 @@ interface Product {
   description: string;
   price: number;
   images: string[];
+  
   in_stock: boolean;
   featured?: boolean;
 }

@@ -27,7 +27,7 @@ interface Product {
   price: number;
   images: string[];
   in_stock: boolean;
-  materials: string[];
+  
 }
 
 interface CartItem extends Product {
@@ -100,7 +100,7 @@ function App() {
             price: product.price,
             images: product.images,
             description: product.description,
-            materials: product.materials,
+          
             slug: product.slug,
             quantity: 1,
           }),
@@ -291,7 +291,7 @@ function App() {
       {currentView === 'checkout' && (
         <CheckoutPage
           items={cartItemsForCheckout}
-          onBack={() => setIsCartOpen(true)}
+        
           onOrderComplete={handleOrderComplete}
         />
       )}

@@ -17,6 +17,7 @@ interface CartItem extends Product {
 
 interface CheckoutPageProps {
   items: Product[];
+  
   onOrderComplete: (orderId: string) => void;
 }
 
@@ -33,6 +34,7 @@ const paymentOptions: PaymentOption[] = [
 
 export default function CheckoutPage({
   items,
+
   onOrderComplete,
 }: CheckoutPageProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -85,7 +87,7 @@ const handlePayment = async () => {
     const res = await fetch('http://localhost:5001/api/payment/order', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ amount: totalAmount }), // amount in rupees
+      body: JSON.stringify({ amount: total }), // amount in rupees
     });
 
     const order = await res.json();
@@ -160,12 +162,10 @@ const handlePayment = async () => {
 
       const json = await res.json();
 
-      handlePayment();
+      await handlePayment();
 
 
-      handlePayment(total, json.id);
-
-
+     
       onOrderComplete(json.id);
     } catch (error) {
       console.error('Error creating order:', error);

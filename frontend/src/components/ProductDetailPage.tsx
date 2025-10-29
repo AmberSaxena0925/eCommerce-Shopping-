@@ -11,7 +11,7 @@ interface Product {
   category_id?: string;
   collection_id?: string;
   images: string[];
-  materials: string[];
+ 
   in_stock: boolean;
   featured?: boolean;
 }
