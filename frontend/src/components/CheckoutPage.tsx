@@ -9,8 +9,6 @@ import { Product } from '../types';
 import { useEffect } from 'react';
 
 
-
-
 interface CartItem extends Product {
   quantity: number;
 }
@@ -95,7 +93,7 @@ const handlePayment = async () => {
 
     // 2️⃣ Open Razorpay checkout
     const options = {
-      key:  'rzp_live_ItsoYEscit5gog', // not use the key like this..its just for testing
+      key:  'rzp_live_ItsoYEscit5gog',
       amount: order.amount,
       currency: order.currency,
       name: 'Your Shop Name',
