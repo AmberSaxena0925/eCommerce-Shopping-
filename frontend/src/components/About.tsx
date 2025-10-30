@@ -1,21 +1,21 @@
 
-import { Sparkles, Award, Shield } from 'lucide-react';
+import { Sparkles, Award, Package } from 'lucide-react';
 
 export default function About() {
   const features = [
     {
       icon: Sparkles,
-      title: 'Craftsmanship',
-      description: 'Each piece is meticulously handcrafted by master artisans.',
+      title: '31 Years of Legacy',
+      description: 'Establishing a legacy of excellence since 1994.',
+    },
+    {
+      icon: Package,
+      title: 'Free Delivery All Over India',
+      description: 'Experience the joy of free shipping across India on all orders.',
     },
     {
       icon: Award,
-      title: 'Premium Materials',
-      description: 'Only the finest metals and stones meet our standards.',
-    },
-    {
-      icon: Shield,
-      title: 'Lifetime Guarantee',
+      title: 'Guarantee Certificate',
       description: 'Every creation is backed by our commitment to excellence.',
     },
   ];
