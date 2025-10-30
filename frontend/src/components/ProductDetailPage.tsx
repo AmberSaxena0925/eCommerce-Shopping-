@@ -172,7 +172,7 @@ export default function ProductDetailPage({
                 {product.name}
               </h1>
               <p className="text-4xl text-white tracking-wider mb-6">
-                ${product.price.toLocaleString()}
+                ₹ {product.price.toLocaleString()}
               </p>
               <p className="text-zinc-400 text-lg leading-relaxed">
                 {product.description}

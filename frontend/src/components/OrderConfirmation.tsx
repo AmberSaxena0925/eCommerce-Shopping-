@@ -139,13 +139,13 @@ export default function OrderConfirmation({
                     <p className="text-white font-light">{item.product_name}</p>
                     <p className="text-zinc-500 text-sm">Qty: {item.quantity}</p>
                   </div>
-                  <p className="text-white">${item.subtotal.toLocaleString()}</p>
+                  <p className="text-white">₹ {item.subtotal.toLocaleString()}</p>
                 </div>
               ))}
               <div className="flex justify-between text-xl pt-4">
                 <span className="text-white tracking-wider">TOTAL</span>
                 <span className="text-white tracking-wider">
-                  ${order.total_amount.toLocaleString()}
+                  ₹ {order.total_amount.toLocaleString()}
                 </span>
               </div>
             </div>

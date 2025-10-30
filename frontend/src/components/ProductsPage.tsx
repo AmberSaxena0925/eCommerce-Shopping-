@@ -321,7 +321,7 @@ export default function ProductsPage({
                         </p>
                         <div className="flex items-center justify-between">
                           <span className="text-xl text-white tracking-wider">
-                            ${product.price.toLocaleString()}
+                            ₹ {product.price.toLocaleString()}
                           </span>
                           {product.category && (
                             <span className="text-xs text-zinc-600 uppercase">

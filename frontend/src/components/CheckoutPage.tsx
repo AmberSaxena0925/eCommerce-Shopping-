@@ -19,16 +19,6 @@ interface CheckoutPageProps {
   onOrderComplete: (orderId: string) => void;
 }
 
-interface PaymentOption {
-  id: string;
-  label: string;
-  icon: JSX.Element;
-}
-
-const paymentOptions: PaymentOption[] = [
-  { id: 'card', label: 'Credit / Debit Card', icon: <CreditCard className="w-5 h-5 text-blue-500" /> },
-  { id: 'upi', label: 'UPI Payment', icon: <Smartphone className="w-5 h-5 text-green-500" /> },
-];
 
 export default function CheckoutPage({
   items,
@@ -36,7 +26,7 @@ export default function CheckoutPage({
   onOrderComplete,
 }: CheckoutPageProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [selectedPayment, setSelectedPayment] = useState<string>('card');
+  const [selectedPayment] = useState<string>('card');
   const [formData, setFormData] = useState({
     customerName: '',
     customerEmail: '',
@@ -123,18 +113,18 @@ const handlePayment = async () => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Basic validation
-    if (selectedPayment === 'upi' && !/^[\w.-]+@[\w.-]+$/.test(formData.upiId)) {
-      alert('Please enter a valid UPI ID (e.g., name@bank)');
-      setIsSubmitting(false);
-      return;
-    }
+    // // Basic validation
+    // if (selectedPayment === 'upi' && !/^[\w.-]+@[\w.-]+$/.test(formData.upiId)) {
+    //   alert('Please enter a valid UPI ID (e.g., name@bank)');
+    //   setIsSubmitting(false);
+    //   return;
+    // }
 
-    if (selectedPayment === 'card' && formData.cardNumber.length < 12) {
-      alert('Please enter a valid card number');
-      setIsSubmitting(false);
-      return;
-    }
+    // if (selectedPayment === 'card' && formData.cardNumber.length < 12) {
+    //   alert('Please enter a valid card number');
+    //   setIsSubmitting(false);
+    //   return;
+    // }
 
     try {
       const body = {
@@ -220,91 +210,7 @@ const handlePayment = async () => {
                   </select>
                 </div>
 
-                {/* PAYMENT OPTIONS */}
-                <div className="pt-8">
-                  <h3 className="text-xl text-white mb-4 tracking-wider">
-                    SELECT PAYMENT METHOD
-                  </h3>
-                  <div className="space-y-3">
-                    {paymentOptions.map((option) => (
-                      <div
-                        key={option.id}
-                        className={`flex items-center justify-between border p-4 rounded-lg cursor-pointer transition-all ${
-                          selectedPayment === option.id
-                            ? 'border-blue-600 bg-blue-950/30'
-                            : 'border-zinc-800 hover:bg-zinc-900'
-                        }`}
-                        onClick={() => setSelectedPayment(option.id)}
-                      >
-                        <div className="flex items-center space-x-3">
-                          {option.icon}
-                          <span className="text-zinc-200">{option.label}</span>
-                        </div>
-                        <input
-                          type="radio"
-                          checked={selectedPayment === option.id}
-                          onChange={() => setSelectedPayment(option.id)}
-                          className="accent-blue-600"
-                        />
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Dynamic Inputs */}
-                  {selectedPayment === 'card' && (
-                    <div className="mt-6 space-y-4">
-                      <label className="block text-zinc-400 text-sm tracking-wider">
-                        CARD DETAILS
-                      </label>
-                      <input
-                        type="text"
-                        name="cardNumber"
-                        placeholder="Card Number"
-                        value={formData.cardNumber}
-                        onChange={handleChange}
-                        required
-                        className="w-full bg-black border border-zinc-800 px-4 py-3 text-white focus:border-blue-500 focus:outline-none transition-colors"
-                      />
-                      <div className="grid grid-cols-2 gap-4">
-                        <input
-                          type="text"
-                          name="cardExpiry"
-                          placeholder="MM/YY"
-                          value={formData.cardExpiry}
-                          onChange={handleChange}
-                          required
-                          className="w-full bg-black border border-zinc-800 px-4 py-3 text-white focus:border-blue-500 focus:outline-none transition-colors"
-                        />
-                        <input
-                          type="password"
-                          name="cardCvv"
-                          placeholder="CVV"
-                          value={formData.cardCvv}
-                          onChange={handleChange}
-                          required
-                          className="w-full bg-black border border-zinc-800 px-4 py-3 text-white focus:border-blue-500 focus:outline-none transition-colors"
-                        />
-                      </div>
-                    </div>
-                  )}
-
-                  {selectedPayment === 'upi' && (
-                    <div className="mt-6">
-                      <label className="block text-zinc-400 text-sm mb-2 tracking-wider">
-                        ENTER YOUR UPI ID
-                      </label>
-                      <input
-                        type="text"
-                        name="upiId"
-                        placeholder="example@upi"
-                        value={formData.upiId}
-                        onChange={handleChange}
-                        required
-                        className="w-full bg-black border border-zinc-800 px-4 py-3 text-white focus:border-green-500 focus:outline-none transition-colors"
-                      />
-                    </div>
-                  )}
-                </div>
+                
 
                 <div className="pt-8">
                   <button

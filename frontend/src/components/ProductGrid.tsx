@@ -164,7 +164,7 @@ export default function ProductGrid({ onAddToCart, onViewProduct }: ProductGridP
                 </p>
                 <div className="flex items-center justify-between">
                   <span className="text-2xl text-white tracking-wider">
-                    ${product.price.toLocaleString()}
+                    ₹ {product.price.toLocaleString()}
                   </span>
                 </div>
               </div>

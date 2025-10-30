@@ -85,7 +85,7 @@ export default function CartSidebar({
                         {item.name}
                       </h3>
                       <p className="text-zinc-500 text-sm mb-3">
-                        ${item.price.toLocaleString()}
+                        ₹ {item.price.toLocaleString()}
                       </p>
 
                       <div className="flex items-center justify-between">
@@ -130,7 +130,7 @@ export default function CartSidebar({
                 <div className="flex items-center justify-between text-lg">
                   <span className="text-zinc-400 tracking-wider">TOTAL</span>
                   <span className="text-white text-2xl tracking-wider">
-                    ${total.toLocaleString()}
+                    ₹ {total.toLocaleString()}
                   </span>
                 </div>
 
