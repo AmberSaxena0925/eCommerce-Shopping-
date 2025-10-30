@@ -21,6 +21,8 @@ const categories = [
   { id: 'necklaces', name: 'Necklaces' },
   { id: 'bracelets', name: 'Bracelets' },
   { id: 'pearls malas', name: 'Pearls Malas' },
+  { id: 'pearls bracelets', name: 'Pearls Bracelets' },
+
 ];
 
 interface ProductsPageProps {
