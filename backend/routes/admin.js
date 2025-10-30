@@ -5,6 +5,8 @@ const Product = require('../models/Product');
 const Collection = require('../models/Collection');
 const Category = require('../models/Category');
 const { adminMiddleware } = require('../middleware/admin');
+const Order = require('../models/Order');
+const OrderItem = require('../models/OrderItem');
 
 // Apply admin middleware to all routes in this file
 router.use(adminMiddleware);
@@ -374,6 +376,97 @@ router.delete('/collections/:id', async (req, res) => {
     res.json({ message: 'Collection deleted successfully' });
   } catch (err) {
     console.error('Failed to delete collection', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Add these imports at the top of your admin.js file:
+// const Order = require('../models/Order');
+// const OrderItem = require('../models/OrderItem');
+
+// Then add these routes to your existing admin.js file after the collections routes
+
+// ==================== ORDERS ====================
+
+// GET /api/admin/orders - Get all orders
+router.get('/orders', async (req, res) => {
+  try {
+    const orders = await Order.find()
+      .sort({ createdAt: -1 });
+
+    res.json(orders);
+  } catch (err) {
+    console.error('Failed to fetch orders', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// GET /api/admin/orders/:id - Get single order with items
+router.get('/orders/:id', async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+
+    const items = await OrderItem.find({ order_id: order._id });
+
+    res.json({ order, items });
+  } catch (err) {
+    console.error('Failed to fetch order', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// PUT /api/admin/orders/:id - Update order status
+router.put('/orders/:id', async (req, res) => {
+  try {
+    const { status } = req.body;
+
+    const order = await Order.findById(req.params.id);
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+
+    // Validate status
+    const validStatuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
+    if (status && !validStatuses.includes(status)) {
+      return res.status(400).json({ message: 'Invalid status' });
+    }
+
+    if (status) order.status = status;
+
+    await order.save();
+
+    res.json({ 
+      message: 'Order updated successfully',
+      order 
+    });
+  } catch (err) {
+    console.error('Failed to update order', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// DELETE /api/admin/orders/:id - Delete order (use with caution)
+router.delete('/orders/:id', async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+    
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+
+    // Delete associated order items first
+    await OrderItem.deleteMany({ order_id: order._id });
+    
+    // Delete the order
+    await Order.findByIdAndDelete(req.params.id);
+
+    res.json({ message: 'Order deleted successfully' });
+  } catch (err) {
+    console.error('Failed to delete order', err);
     res.status(500).json({ message: 'Server error' });
   }
 });

@@ -1,4 +1,4 @@
-import { ShoppingBag, Menu, X, User, LogOut, Plus } from 'lucide-react';
+import { ShoppingBag, Menu, X, User, LogOut, Plus, Package } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 interface NavbarProps {
@@ -7,8 +7,10 @@ interface NavbarProps {
   onAuthClick: () => void;
   onContactClick: () => void;
   onProductsClick: () => void;
+  onLogoClick: () => void; // ADD THIS
   onAdminAddProduct?: () => void;
   onAdminAddCollection?: () => void;
+  onAdminDashboard?: () => void;
   user: any;
   onLogout: () => void;
 }
@@ -19,8 +21,10 @@ export default function Navbar({
   onAuthClick, 
   onContactClick, 
   onProductsClick,
+  onLogoClick, // ADD THIS
   onAdminAddProduct,
   onAdminAddCollection,
+  onAdminDashboard,
   user, 
   onLogout 
 }: NavbarProps) {
@@ -28,10 +32,7 @@ export default function Navbar({
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showAdminDropdown, setShowAdminDropdown] = useState(false);
 
-  // Define admin email (you can also use environment variable)
-  const ADMIN_EMAIL = 'akash@gmail.com'; // Change this to your admin email
-  
-  // Check if current user is admin
+  const ADMIN_EMAIL = 'akash@gmail.com';
   const isAdmin = user && user.email === ADMIN_EMAIL;
 
   useEffect(() => {
@@ -42,7 +43,6 @@ export default function Navbar({
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (showAdminDropdown && !(e.target as Element).closest('.admin-dropdown-container')) {
@@ -62,9 +62,13 @@ export default function Navbar({
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between">
-          <div className="text-2xl font-light tracking-widest text-white">
+          {/* FIXED: Changed onClick and added cursor pointer */}
+          <button 
+            onClick={onLogoClick}
+            className="text-2xl font-light tracking-widest text-white hover:text-zinc-300 transition-colors cursor-pointer"
+          >
             SAI NAMAN PEARLS
-          </div>
+          </button>
 
           <div className="hidden md:flex items-center space-x-12">
             <a href="#collections" className="text-zinc-400 hover:text-white transition-colors tracking-wide">
@@ -89,42 +93,51 @@ export default function Navbar({
                   <span className="text-zinc-400 text-sm font-medium">{user.name}</span>
                 </div>
 
-                {/* Admin Dropdown */}
                 {isAdmin && (
-                  <div className="relative admin-dropdown-container">
-                    <button
-                      onClick={() => setShowAdminDropdown(!showAdminDropdown)}
-                      className="flex items-center space-x-2 bg-zinc-900 text-white px-4 py-2 rounded hover:bg-zinc-800 transition-colors border border-zinc-700"
-                    >
-                      <Plus className="w-4 h-4" />
-                      <span className="text-sm tracking-wide">ADMIN</span>
-                    </button>
+                  <>
+                    <div className="relative admin-dropdown-container">
+                      <button
+                        onClick={() => setShowAdminDropdown(!showAdminDropdown)}
+                        className="flex items-center space-x-2 bg-zinc-900 text-white px-4 py-2 rounded hover:bg-zinc-800 transition-colors border border-zinc-700"
+                      >
+                        <Plus className="w-4 h-4" />
+                        <span className="text-sm tracking-wide">ADMIN</span>
+                      </button>
 
-                    {showAdminDropdown && (
-                      <div className="absolute right-0 mt-2 w-56 bg-zinc-950 border border-zinc-800 rounded shadow-lg overflow-hidden animate-fade-in">
-                        <button
-                          onClick={() => {
-                            onAdminAddProduct?.();
-                            setShowAdminDropdown(false);
-                          }}
-                          className="w-full text-left px-4 py-3 text-zinc-400 hover:text-white hover:bg-zinc-900 transition-colors flex items-center space-x-2"
-                        >
-                          <Plus className="w-4 h-4" />
-                          <span className="text-sm tracking-wide">Add Product</span>
-                        </button>
-                        <button
-                          onClick={() => {
-                            onAdminAddCollection?.();
-                            setShowAdminDropdown(false);
-                          }}
-                          className="w-full text-left px-4 py-3 text-zinc-400 hover:text-white hover:bg-zinc-900 transition-colors flex items-center space-x-2 border-t border-zinc-800"
-                        >
-                          <Plus className="w-4 h-4" />
-                          <span className="text-sm tracking-wide">Add Collection</span>
-                        </button>
-                      </div>
-                    )}
-                  </div>
+                      {showAdminDropdown && (
+                        <div className="absolute right-0 mt-2 w-56 bg-zinc-950 border border-zinc-800 rounded shadow-lg overflow-hidden animate-fade-in">
+                          <button
+                            onClick={() => {
+                              onAdminAddProduct?.();
+                              setShowAdminDropdown(false);
+                            }}
+                            className="w-full text-left px-4 py-3 text-zinc-400 hover:text-white hover:bg-zinc-900 transition-colors flex items-center space-x-2"
+                          >
+                            <Plus className="w-4 h-4" />
+                            <span className="text-sm tracking-wide">Add Product</span>
+                          </button>
+                          <button
+                            onClick={() => {
+                              onAdminAddCollection?.();
+                              setShowAdminDropdown(false);
+                            }}
+                            className="w-full text-left px-4 py-3 text-zinc-400 hover:text-white hover:bg-zinc-900 transition-colors flex items-center space-x-2 border-t border-zinc-800"
+                          >
+                            <Plus className="w-4 h-4" />
+                            <span className="text-sm tracking-wide">Add Collection</span>
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    <button
+                      onClick={onAdminDashboard}
+                      className="flex items-center space-x-2 bg-blue-900 text-white px-4 py-2 rounded hover:bg-blue-800 transition-colors border border-blue-700"
+                    >
+                      <Package className="w-4 h-4" />
+                      <span className="text-sm tracking-wide">DASHBOARD</span>
+                    </button>
+                  </>
                 )}
 
                 <button
@@ -168,43 +181,51 @@ export default function Navbar({
             <a href="#collections" className="text-zinc-400 hover:text-white transition-colors tracking-wide">
               COLLECTIONS
             </a>
-            <button onClick={onProductsClick} className="text-zinc-400 hover:text-white transition-colors tracking-wide text-left">
+            <button onClick={() => { onProductsClick(); setIsMobileMenuOpen(false); }} className="text-zinc-400 hover:text-white transition-colors tracking-wide text-left">
               PRODUCTS
             </button>
             <a href="#about" className="text-zinc-400 hover:text-white transition-colors tracking-wide">
               ABOUT
             </a>
-            <button onClick={onContactClick} className="text-zinc-400 hover:text-white transition-colors tracking-wide text-left">
+            <button onClick={() => { onContactClick(); setIsMobileMenuOpen(false); }} className="text-zinc-400 hover:text-white transition-colors tracking-wide text-left">
               CONTACT
             </button>
 
-            {/* Mobile Admin Menu */}
             {user && isAdmin && (
-              <>
-                <div className="border-t border-zinc-800 pt-4">
-                  <p className="text-zinc-600 text-xs tracking-wider mb-3">ADMIN</p>
-                  <button 
-                    onClick={() => {
-                      onAdminAddProduct?.();
-                      setIsMobileMenuOpen(false);
-                    }}
-                    className="w-full text-left text-zinc-400 hover:text-white transition-colors tracking-wide flex items-center space-x-2 mb-3"
-                  >
-                    <Plus className="w-4 h-4" />
-                    <span>Add Product</span>
-                  </button>
-                  <button 
-                    onClick={() => {
-                      onAdminAddCollection?.();
-                      setIsMobileMenuOpen(false);
-                    }}
-                    className="w-full text-left text-zinc-400 hover:text-white transition-colors tracking-wide flex items-center space-x-2"
-                  >
-                    <Plus className="w-4 h-4" />
-                    <span>Add Collection</span>
-                  </button>
-                </div>
-              </>
+              <div className="border-t border-zinc-800 pt-4">
+                <p className="text-zinc-600 text-xs tracking-wider mb-3">ADMIN</p>
+                <button 
+                  onClick={() => {
+                    onAdminDashboard?.();
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="w-full text-left text-zinc-400 hover:text-white transition-colors tracking-wide flex items-center space-x-2 mb-3"
+                >
+                  <Package className="w-4 h-4" />
+                  <span>Admin Dashboard</span>
+                </button>
+                <p className="text-zinc-600 text-xs tracking-wider mb-3 mt-4">QUICK ACTIONS</p>
+                <button 
+                  onClick={() => {
+                    onAdminAddProduct?.();
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="w-full text-left text-zinc-400 hover:text-white transition-colors tracking-wide flex items-center space-x-2 mb-3"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Add Product</span>
+                </button>
+                <button 
+                  onClick={() => {
+                    onAdminAddCollection?.();
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="w-full text-left text-zinc-400 hover:text-white transition-colors tracking-wide flex items-center space-x-2"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Add Collection</span>
+                </button>
+              </div>
             )}
 
             {user ? (
@@ -228,3 +249,4 @@ export default function Navbar({
     </nav>
   );
 }
+
