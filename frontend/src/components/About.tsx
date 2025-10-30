@@ -67,7 +67,7 @@ export default function About() {
           <div className="space-y-10">
             <div className="relative group flex justify-center">
               <img
-                src="/certificate.png"
+                src="/public/certificate.png"
                 alt="Certification"
                 className="w-full max-w-md rounded-xl shadow-xl object-cover border border-zinc-700 group-hover:scale-105 transition-transform duration-700"
               />

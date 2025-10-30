@@ -209,9 +209,9 @@ export default function ContactPage({ onBack }: ContactPageProps) {
                   <p className="text-zinc-400">
                     Sai Naman Pearls
                     <br />
-                    maitrivanam Ameerpet
+                    ESCI campus Gachibowli,
                     <br />
-                    Hyderabad 500016, India.
+                    Hyderabad, Telangana 500032.
                   </p>
                 </div>
               </div>
