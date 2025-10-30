@@ -15,9 +15,10 @@ import OrderConfirmation from './components/OrderConfirmation';
 import LoadingScreen from './components/LoadingScreen';
 import AdminProductForm from './components/AdminProductForm';
 import AdminCollectionForm from './components/AdminCollectionForm';
+import AdminDashboard from './components/AdminDashboard';
 import { useAuth } from './context/AuthContext';
 
-type View = 'home' | 'contact' | 'products' | 'product-detail' | 'checkout' | 'order-confirmation';
+type View = 'home' | 'contact' | 'products' | 'product-detail' | 'checkout' | 'order-confirmation' | 'admin-dashboard';
 
 interface Product {
   id: string;
@@ -237,6 +238,16 @@ function App() {
     console.log('Collection created successfully!');
   };
 
+  const handleAdminDashboard = () => {
+    setCurrentView('admin-dashboard');
+  };
+
+  const handleEditProduct = (productId: string) => {
+    // Open edit form with productId
+    console.log('Edit product:', productId);
+    setIsAdminProductFormOpen(true);
+  };
+
   // Convert cartItems for display (flatten duplicates)
   const cartItemsForCheckout = cartItems.flatMap((item) =>
     Array(item.quantity).fill({ ...item, quantity: 1 })
@@ -254,8 +265,10 @@ function App() {
         onAuthClick={() => setIsAuthModalOpen(true)}
         onContactClick={() => setCurrentView('contact')}
         onProductsClick={() => setCurrentView('products')}
+        onLogoClick={handleBackToHome}
         onAdminAddProduct={() => setIsAdminProductFormOpen(true)}
         onAdminAddCollection={() => setIsAdminCollectionFormOpen(true)}
+        onAdminDashboard={handleAdminDashboard}
         user={user}
         onLogout={handleLogout}
       />
@@ -291,13 +304,18 @@ function App() {
       {currentView === 'checkout' && (
         <CheckoutPage
           items={cartItemsForCheckout}
-        
           onOrderComplete={handleOrderComplete}
         />
       )}
 
       {currentView === 'order-confirmation' && orderId && (
         <OrderConfirmation orderId={orderId} onBackToHome={handleBackToHome} />
+      )}
+
+      {currentView === 'admin-dashboard' && (
+        <AdminDashboard 
+          onClose={handleBackToHome}
+        />
       )}
 
       <CartSidebar

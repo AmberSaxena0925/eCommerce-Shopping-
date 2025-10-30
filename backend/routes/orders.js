@@ -1,10 +1,9 @@
 const express = require('express');
 const router = express.Router();
-
 const Order = require('../models/Order');
 const OrderItem = require('../models/OrderItem');
 
-// POST /api/orders - create order and items
+// POST /api/orders - Create order (public for checkout)
 router.post('/orders', async (req, res) => {
   try {
     const {
@@ -20,7 +19,7 @@ router.post('/orders', async (req, res) => {
     } = req.body;
 
     if (!customerName || !customerEmail || !shippingAddress || !Array.isArray(items)) {
-      return res.status(400).json({ message: 'Missing order data' });
+      return res.status(400).json({ message: 'Missing required fields' });
     }
 
     const order = new Order({
@@ -50,23 +49,24 @@ router.post('/orders', async (req, res) => {
 
     res.status(201).json({ id: order._id });
   } catch (err) {
-    console.error('Failed to create order', err);
-    res.status(500).json({ message: 'Server error' });
+    console.error('Create order error:', err);
+    res.status(500).json({ message: 'Failed to create order' });
   }
 });
 
-// GET /api/orders/:id - get order and items
+// GET /api/orders/:id - View single order (public for confirmation)
 router.get('/orders/:id', async (req, res) => {
   try {
     const order = await Order.findById(req.params.id);
-    if (!order) return res.status(404).json({ message: 'Order not found' });
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
 
     const items = await OrderItem.find({ order_id: order._id });
-
     res.json({ order, items });
   } catch (err) {
-    console.error('Failed to fetch order', err);
-    res.status(500).json({ message: 'Server error' });
+    console.error('Fetch order error:', err);
+    res.status(500).json({ message: 'Failed to fetch order' });
   }
 });
 
