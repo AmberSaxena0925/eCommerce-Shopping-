@@ -83,7 +83,7 @@ const handlePayment = async () => {
 
     // 2️⃣ Open Razorpay checkout
     const options = {
-      key:  'rzp_live_ItsoYEscit5gog',
+      key:  'rzp_test_RZe6IBiBhKc4iu', 
       amount: order.amount,
       currency: order.currency,
       name: 'Your Shop Name',
