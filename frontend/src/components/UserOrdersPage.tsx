@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Clock, CheckCircle, X, ChevronDown, ChevronUp, Package, MapPin, Calendar, Mail, Phone, Truck } from 'lucide-react';
+import { Clock, CheckCircle, X, ChevronDown, ChevronUp, Package, MapPin, Calendar,  Phone, Truck } from 'lucide-react';
 
 interface Order {
   _id: string;
@@ -28,7 +28,7 @@ interface UserOrdersPageProps {
   onBack: () => void;
 }
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:5001';
+
 
 export default function UserOrdersPage({ onBack }: UserOrdersPageProps) {
   const [activeTab, setActiveTab] = useState<'all' | 'current' | 'completed'>('all');
@@ -55,7 +55,7 @@ export default function UserOrdersPage({ onBack }: UserOrdersPageProps) {
         return;
       }
 
-      const res = await fetch(`${API_BASE}/api/user/orders`, {
+      const res = await fetch('http://localhost:5001/api/user/orders', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -101,7 +101,7 @@ export default function UserOrdersPage({ onBack }: UserOrdersPageProps) {
 
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`${API_BASE}/api/user/orders/${orderId}`, {
+      const res = await fetch('http://localhost:5001/api/user/orders/${orderId}', {
         headers: {
           'Authorization': `Bearer ${token}`
         }

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ShoppingBag, SlidersHorizontal, X, Trash2, Edit } from 'lucide-react';
+import { ShoppingBag, SlidersHorizontal, X, Trash2 } from 'lucide-react';
 import { localProducts } from '../data/products';
 
 interface Product {
@@ -60,7 +60,7 @@ export default function ProductsPage({
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:5001/api/products');
+      const res = await fetch('http://localhost:5001/api/admin/products');
       
       let backendProducts: Product[] = [];
       
