@@ -15,34 +15,34 @@ import { useNavigate } from "react-router-dom";
 
 const collections = [
   {
-    title: "PEARL BRACELETS",
+    title: "BRACELETS",
     category: "bracelets",
-    image: "/public/eclat1.jpg",
+    image: "/collection/Bracelet.jpg",
   },
   {
-    title: "ELEGANT PEARL MALA'S",
+    title: "PEARL MALAS",
     category: "pearl-malas",
-    image: "/public/elegant-pearl-malas.jpg",
+    image: "/collection/Bracelet.jpg",
   },
   {
-    title: "S SILVER PEARL RINGS",
+    title: "RINGS",
     category: "rings",
-    image: "/images/collections/rings.jpg",
+    image: "/collection/Ring.jpg",
   },
   {
     title: "PEARL NECKLACES",
     category: "necklaces",
-    image: "/images/collections/necklaces.jpg",
+    image: "/images/collections/necklace.jpg",
   },
   {
-    title: "PEARL EARRINGS",
+    title: "EARRINGS",
     category: "earrings",
-    image: "/images/collections/earrings.jpg",
+    image: "/collection/Earring.jpg",
   },
   {
     title: "PEARLS BRACELETS",
     category: "pearls-bracelets",
-    image: "/images/collections/pearls-bracelets.jpg",
+    image: "/collection/Bracelet.jpg",
   },
 ];
 
