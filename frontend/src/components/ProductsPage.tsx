@@ -28,7 +28,7 @@ interface ProductsPageProps {
   onBack: () => void;
   onViewProduct: (productSlug: string) => void;
   onAddToCart: (product: Product) => void;
-  user?: any; // Add user prop to check if admin
+  user?: any; 
 }
 
 export default function ProductsPage({
@@ -169,7 +169,6 @@ export default function ProductsPage({
 
       if (res.ok) {
         alert(`${productName} deleted successfully!`);
-        // Refresh products
         await fetchProducts();
         setDeleteConfirm(null);
       } else {

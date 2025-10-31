@@ -9,7 +9,7 @@ export const localProducts = [
     These are not mere accessories, but a symbol of pure, refined grace, designed to adorn the wrist with an air of effortless prestige.`,
     price: 1999,
     mrp: 3200,
-    category: 'bracelet',
+    category: 'bracelets',
     images: [
       '/images/products/eclat1.png',
       '/images/products/eclat2.png',
@@ -28,7 +28,7 @@ export const localProducts = [
     a timeless treasure that imparts a touch of refined luxury to any gesture.`,
     price: 999,
     mrp: 1799,
-    category: 'bracelet',
+    category: 'bracelets',
     images: [
       '/images/products/heirloom1.png',
       '/images/products/heirloom2.png',
@@ -47,7 +47,7 @@ export const localProducts = [
     This is a timeless emblem of sophistication, celebrating the simple, organic beauty of a real pearl in its most perfect state.`,
     price: 799,
     mrp: 1499,
-    category: 'ring',
+    category: 'rings',
     images: [
       '/images/products/luna1.png',
       '/images/products/luna2.png',
@@ -67,7 +67,7 @@ export const localProducts = [
     designed to elevate any occasion with an air of refined glamour.`,
     price: 3100,
     mrp: 5500,
-    Category: 'necklace',
+    Category: 'necklaces',
     images: [
       '/images/products/signature1.png',
       '/images/products/signature2.png',
@@ -87,7 +87,7 @@ export const localProducts = [
     This is a design of pure elegance, evoking a feeling of quiet confidence and sophisticated taste.`,
     price: 749,
     mrp: 1199,
-    category: 'earring',
+    category: 'earrings',
     images: [
       '/images/products/celestial1.png',
       '/images/products/celestial2.png',
