@@ -79,7 +79,7 @@ export default function Footer({ onContactClick }: FooterProps) {
 
         <div className="border-t border-zinc-900 pt-8 text-center">
           <p className="text-zinc-600 text-sm tracking-wider">
-            © 2024 NOIR. ALL RIGHTS RESERVED.
+            © 2025 Sai Naman Pearls. ALL RIGHTS RESERVED.
           </p>
         </div>
       </div>
