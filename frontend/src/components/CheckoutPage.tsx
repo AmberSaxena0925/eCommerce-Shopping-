@@ -3,7 +3,7 @@ import {
   CreditCard,
   Package,
   Check,
-  Smartphone,
+  
 } from 'lucide-react';
 import { Product } from '../types';
 import { useEffect } from 'react';

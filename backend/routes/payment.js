@@ -17,7 +17,7 @@ const razorpay = new Razorpay({
 });
 
 // 🧾 Create new order
-router.post('/create-order', async (req, res) => {
+router.post('/order', async (req, res) => {
   const { amount } = req.body;
   try {
     const order = await razorpay.orders.create({

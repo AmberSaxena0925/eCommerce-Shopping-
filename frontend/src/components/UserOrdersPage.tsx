@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Clock, CheckCircle, X, ChevronDown, ChevronUp, Package, MapPin, Calendar, Mail, Phone, Truck } from 'lucide-react';
+import { Clock, CheckCircle, X, ChevronDown, ChevronUp, Package, MapPin, Calendar,  Phone, Truck } from 'lucide-react';
 
 interface Order {
   _id: string;
