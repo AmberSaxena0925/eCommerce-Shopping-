@@ -16,15 +16,11 @@ app.use(cors({
 
 // ✅ 2. BODY PARSER (must come BEFORE any routes)
 app.use(express.json());
-app.use(express.urlencoded({ extended: true })); // optional but recommended for form data
+app.use(express.urlencoded({ extended: true }));
 
 // ✅ 3. ROUTES
 const adminRoutes = require('./routes/admin');
 app.use('/api/admin', adminRoutes);
-
-const paymentRoutes = require('./routes/payment');
-app.use('/api/payment', paymentRoutes);
-
 
 const authRoutes = require('./routes/auth');
 app.use('/api/auth', authRoutes);
@@ -41,6 +37,14 @@ app.use('/api', contentRoutes);
 const ordersRoutes = require('./routes/orders');
 app.use('/api', ordersRoutes);
 
+// NEW: User orders route
+const userOrdersRoutes = require('./routes/userOrders');
+app.use('/api/user', userOrdersRoutes);
+
+// Optional: Payment routes if you have them
+// const paymentRoutes = require('./routes/payment');
+// app.use('/api/payment', paymentRoutes);
+
 // basic health
 app.get('/api/health', (req, res) => res.json({ ok: true }));
 
@@ -50,14 +54,14 @@ async function start() {
   try {
     if (mongo) {
       await mongoose.connect(mongo, { useNewUrlParser: true, useUnifiedTopology: true });
-      console.log('Connected to MongoDB');
+      console.log('✅ Connected to MongoDB');
     } else {
-      console.log('MONGO_URI not set — skipping MongoDB connection (server will still run)');
+      console.log('⚠️  MONGO_URI not set — skipping MongoDB connection (server will still run)');
     }
 
-    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+    app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
   } catch (err) {
-    console.error('Failed to start server', err);
+    console.error('❌ Failed to start server', err);
     process.exit(1);
   }
 }

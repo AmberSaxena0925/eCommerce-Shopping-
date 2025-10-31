@@ -15,10 +15,11 @@ import OrderConfirmation from './components/OrderConfirmation';
 import LoadingScreen from './components/LoadingScreen';
 import AdminProductForm from './components/AdminProductForm';
 import AdminCollectionForm from './components/AdminCollectionForm';
+import UserOrdersPage from './components/UserOrdersPage';
 import AdminDashboard from './components/AdminDashboard';
 import { useAuth } from './context/AuthContext';
 
-type View = 'home' | 'contact' | 'products' | 'product-detail' | 'checkout' | 'order-confirmation' | 'admin-dashboard';
+type View = 'home' | 'contact' | 'products' | 'product-detail' | 'checkout' | 'order-confirmation' | 'orders' | 'admin-dashboard';
 
 interface Product {
   id: string;
@@ -28,7 +29,7 @@ interface Product {
   price: number;
   images: string[];
   in_stock: boolean;
-  
+  materials: string[];
 }
 
 interface CartItem extends Product {
@@ -101,7 +102,7 @@ function App() {
             price: product.price,
             images: product.images,
             description: product.description,
-          
+            materials: product.materials,
             slug: product.slug,
             quantity: 1,
           }),
@@ -238,16 +239,6 @@ function App() {
     console.log('Collection created successfully!');
   };
 
-  const handleAdminDashboard = () => {
-    setCurrentView('admin-dashboard');
-  };
-
-  const handleEditProduct = (productId: string) => {
-    // Open edit form with productId
-    console.log('Edit product:', productId);
-    setIsAdminProductFormOpen(true);
-  };
-
   // Convert cartItems for display (flatten duplicates)
   const cartItemsForCheckout = cartItems.flatMap((item) =>
     Array(item.quantity).fill({ ...item, quantity: 1 })
@@ -265,10 +256,11 @@ function App() {
         onAuthClick={() => setIsAuthModalOpen(true)}
         onContactClick={() => setCurrentView('contact')}
         onProductsClick={() => setCurrentView('products')}
-        onLogoClick={handleBackToHome}
         onAdminAddProduct={() => setIsAdminProductFormOpen(true)}
+        onAdminDashboardClick={() => setCurrentView('admin-dashboard')}
+        onOrdersClick={() => setCurrentView('orders')}
+        onHomeClick={handleBackToHome}
         onAdminAddCollection={() => setIsAdminCollectionFormOpen(true)}
-        onAdminDashboard={handleAdminDashboard}
         user={user}
         onLogout={handleLogout}
       />
@@ -304,6 +296,7 @@ function App() {
       {currentView === 'checkout' && (
         <CheckoutPage
           items={cartItemsForCheckout}
+          onBack={() => setIsCartOpen(true)}
           onOrderComplete={handleOrderComplete}
         />
       )}
@@ -312,10 +305,12 @@ function App() {
         <OrderConfirmation orderId={orderId} onBackToHome={handleBackToHome} />
       )}
 
+      {currentView === 'orders' && (
+        <UserOrdersPage onBack={handleBackToHome} />
+      )}
+
       {currentView === 'admin-dashboard' && (
-        <AdminDashboard 
-          onClose={handleBackToHome}
-        />
+        <AdminDashboard onClose={handleBackToHome} />
       )}
 
       <CartSidebar
