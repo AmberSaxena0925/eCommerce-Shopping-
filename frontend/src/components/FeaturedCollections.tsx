@@ -2,12 +2,29 @@ import { ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const collections = [
-  { title: "BRACELETS", category: "bracelets", image: "/collection/Bracelet.jpg" },
-  { title: "PEARL MALAS", category: "pearl-malas", image: "/collection/Mala.jpg" },
-  { title: "RINGS", category: "rings", image: "/collection/Ring.jpg" },
-  { title: "PEARL NECKLACES", category: "necklaces", image: "/collection/Necklace.jpg" },
-  { title: "EARRINGS", category: "earrings", image: "/collection/Earring.jpg" },
-  { title: "PEARLS BRACELETS", category: "pearls-bracelets", image: "/collection/PearlBracelet.jpg" },
+  { title: "BRACELETS", 
+    category: "bracelets", 
+    image: "/collection/Bracelet.jpg" },
+
+  { title: "PEARL MALAS", 
+    category: "pearl-malas", 
+    image: "/collection/Mala.jpg" },
+
+  { title: "RINGS", 
+    category: "rings", 
+    image: "/collection/Ring.jpg" },
+
+  { title: "NECKLACES", 
+    category: "necklaces", 
+    image: "/collection/Necklace.jpg" },
+
+  { title: "EARRINGS", 
+    category: "earrings", 
+    image: "/collection/Earring.jpg" },
+    
+  { title: "PEARLS BRACELETS", 
+    category: "pearls-bracelets", 
+    image: "/collection/PearlBracelet.jpg" },
 ];
 
 export default function CollectionsPage() {
