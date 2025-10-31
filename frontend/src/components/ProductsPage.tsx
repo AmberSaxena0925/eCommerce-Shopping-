@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ShoppingBag, SlidersHorizontal, X } from 'lucide-react';
+import { ShoppingBag, SlidersHorizontal, X, Trash2, Edit } from 'lucide-react';
 import { localProducts } from '../data/products';
 
 interface Product {
@@ -22,25 +22,31 @@ const categories = [
   { id: 'bracelets', name: 'Bracelets' },
   { id: 'pearls malas', name: 'Pearls Malas' },
   { id: 'pearls bracelets', name: 'Pearls Bracelets' },
-
 ];
 
 interface ProductsPageProps {
   onBack: () => void;
   onViewProduct: (productSlug: string) => void;
   onAddToCart: (product: Product) => void;
+  user?: any; // Add user prop to check if admin
 }
 
 export default function ProductsPage({
   onBack,
   onViewProduct,
   onAddToCart,
+  user,
 }: ProductsPageProps) {
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+
+  // Define admin email
+  const ADMIN_EMAIL = 'akash@gmail.com';
+  const isAdmin = user && user.email === ADMIN_EMAIL;
 
   useEffect(() => {
     fetchProducts();
@@ -54,7 +60,6 @@ export default function ProductsPage({
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      // Fetch from backend with full URL
       const res = await fetch('http://localhost:5001/api/products');
       
       let backendProducts: Product[] = [];
@@ -63,16 +68,13 @@ export default function ProductsPage({
         const data = await res.json();
         console.log('Backend all products response:', data);
         
-        // Handle both array response and paginated response
         if (Array.isArray(data)) {
           backendProducts = data;
         } else if (data.products && Array.isArray(data.products)) {
           backendProducts = data.products;
         }
 
-        // Normalize backend products - extract category name from category_id
         backendProducts = backendProducts.map((p: any) => {
-          // Get category name from various possible structures
           let categoryName = '';
           
           if (p.category) {
@@ -105,7 +107,6 @@ export default function ProductsPage({
         console.warn('Backend fetch failed:', res.status);
       }
 
-      // Combine and deduplicate
       const combined = [...backendProducts, ...localProducts];
       const deduped = Array.from(
         new Map(combined.map((p) => [p.slug, p])).values()
@@ -143,6 +144,42 @@ export default function ProductsPage({
     console.log('Category clicked:', categoryId);
     setSelectedCategory(categoryId);
     setIsMobileFilterOpen(false);
+  };
+
+  const handleDeleteProduct = async (productId: string, productName: string) => {
+    if (!isAdmin) {
+      alert('You do not have permission to delete products');
+      return;
+    }
+
+    // Show confirmation
+    if (deleteConfirm !== productId) {
+      setDeleteConfirm(productId);
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`http://localhost:5001/api/admin/products/${productId}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (res.ok) {
+        alert(`${productName} deleted successfully!`);
+        // Refresh products
+        await fetchProducts();
+        setDeleteConfirm(null);
+      } else {
+        const errorData = await res.json();
+        alert(`Failed to delete product: ${errorData.message || 'Unknown error'}`);
+      }
+    } catch (err) {
+      console.error('Failed to delete product', err);
+      alert('Failed to delete product. Please try again.');
+    }
   };
 
   return (
@@ -307,6 +344,24 @@ export default function ProductsPage({
                             OUT OF STOCK
                           </div>
                         )}
+
+                        {/* Admin Delete Button */}
+                        {isAdmin && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteProduct(product.id, product.name);
+                            }}
+                            className={`absolute top-4 left-4 p-2 transition-all duration-300 ${
+                              deleteConfirm === product.id
+                                ? 'bg-red-600 text-white'
+                                : 'bg-zinc-900/80 text-zinc-400 hover:bg-red-600 hover:text-white'
+                            }`}
+                            title={deleteConfirm === product.id ? 'Click again to confirm' : 'Delete product'}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        )}
                       </div>
 
                       <div
@@ -330,6 +385,13 @@ export default function ProductsPage({
                           )}
                         </div>
                       </div>
+
+                      {/* Delete confirmation message */}
+                      {isAdmin && deleteConfirm === product.id && (
+                        <div className="absolute bottom-0 left-0 right-0 bg-red-600 text-white text-center py-2 text-xs tracking-wider">
+                          CLICK DELETE AGAIN TO CONFIRM
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>

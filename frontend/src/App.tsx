@@ -277,13 +277,22 @@ function App() {
 
       {currentView === 'contact' && <ContactPage onBack={handleBackToHome} />}
 
-      {currentView === 'products' && (
+      {/* {currentView === 'products' && (
         <ProductsPage
           onBack={handleBackToHome}
           onViewProduct={handleViewProduct}
           onAddToCart={handleAddToCart}
         />
-      )}
+      )} */}
+
+      {currentView === 'products' && (
+  <ProductsPage
+    onBack={handleBackToHome}
+    onViewProduct={handleViewProduct}
+    onAddToCart={handleAddToCart}
+    user={user}  // Add this line
+  />
+)}
 
       {currentView === 'product-detail' && selectedProductSlug && (
         <ProductDetailPage
