@@ -12,6 +12,20 @@
   }
 }
 
+@keyframes scroll-ltr {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-scroll-ltr {
+  animation: scroll-ltr 14s linear infinite;
+}
+
+
 @layer utilities {
   .animate-fade-in {
     animation: fade-in 1.2s ease-out both;
