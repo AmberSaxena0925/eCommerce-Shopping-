@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
+import ReviewPopup from './components/ReviewPopup';
 import ProductGrid from './components/ProductGrid';
 import FeaturedCollections from './components/FeaturedCollections';
 import About from './components/About';
@@ -19,7 +20,15 @@ import UserOrdersPage from './components/UserOrdersPage';
 import AdminDashboard from './components/AdminDashboard';
 import { useAuth } from './context/AuthContext';
 
-type View = 'home' | 'contact' | 'products' | 'product-detail' | 'checkout' | 'order-confirmation' | 'orders' | 'admin-dashboard';
+type View =
+  | 'home'
+  | 'contact'
+  | 'products'
+  | 'product-detail'
+  | 'checkout'
+  | 'order-confirmation'
+  | 'orders'
+  | 'admin-dashboard';
 
 interface Product {
   id: string;
@@ -29,7 +38,6 @@ interface Product {
   price: number;
   images: string[];
   in_stock: boolean;
-
 }
 
 interface CartItem extends Product {
@@ -38,6 +46,7 @@ interface CartItem extends Product {
 
 function App() {
   const { user, logout } = useAuth();
+
   const [currentView, setCurrentView] = useState<View>('home');
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
@@ -47,6 +56,7 @@ function App() {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [selectedProductSlug, setSelectedProductSlug] = useState<string | null>(null);
   const [orderId, setOrderId] = useState<string | null>(null);
+  const [showReviewPopup, setShowReviewPopup] = useState(false);
 
   // Sync cart with backend when user logs in
   useEffect(() => {
@@ -68,7 +78,6 @@ function App() {
 
       if (res.ok) {
         const data = await res.json();
-        // Transform backend cart to frontend format
         const items = data.reduce((acc: CartItem[], item: any) => {
           const existing = acc.find((i) => i.id === item.id);
           if (existing) {
@@ -85,9 +94,18 @@ function App() {
     }
   };
 
+  // Automatically show Review Popup after 30s of login
+  useEffect(() => {
+    if (user) {
+      const timer = setTimeout(() => {
+        setShowReviewPopup(true);
+      }, 30000);
+      return () => clearTimeout(timer);
+    }
+  }, [user]);
+
   const handleAddToCart = async (product: Product) => {
     if (user) {
-      // If logged in, add to backend
       try {
         const token = localStorage.getItem('token');
         const res = await fetch('/api/cart/add', {
@@ -102,20 +120,16 @@ function App() {
             price: product.price,
             images: product.images,
             description: product.description,
-           
             slug: product.slug,
             quantity: 1,
           }),
         });
 
-        if (res.ok) {
-          await syncCartWithBackend();
-        }
+        if (res.ok) await syncCartWithBackend();
       } catch (err) {
         console.error('Failed to add to cart', err);
       }
     } else {
-      // If not logged in, use local state
       setCartItems((prev) => {
         const existing = prev.find((item) => item.id === product.id);
         if (existing) {
@@ -140,10 +154,7 @@ function App() {
           },
           body: JSON.stringify({ productId, quantity }),
         });
-
-        if (res.ok) {
-          await syncCartWithBackend();
-        }
+        if (res.ok) await syncCartWithBackend();
       } catch (err) {
         console.error('Failed to update cart', err);
       }
@@ -170,12 +181,9 @@ function App() {
           },
           body: JSON.stringify({ productId }),
         });
-
-        if (res.ok) {
-          await syncCartWithBackend();
-        }
+        if (res.ok) await syncCartWithBackend();
       } catch (err) {
-        console.error('Failed to remove from cart', err);
+        console.error('Failed to remove item', err);
       }
     } else {
       setCartItems((prev) => prev.filter((item) => item.id !== productId));
@@ -195,8 +203,6 @@ function App() {
     setOrderId(newOrderId);
     setCurrentView('order-confirmation');
     setCartItems([]);
-    
-    // Clear backend cart if user is logged in
     if (user) {
       try {
         const token = localStorage.getItem('token');
@@ -229,27 +235,12 @@ function App() {
     setCurrentView('home');
   };
 
-  const handleAdminProductSuccess = () => {
-    // Refresh products if needed
-    console.log('Product created successfully!');
-  };
-
-  const handleAdminCollectionSuccess = () => {
-    // Refresh collections if needed
-    console.log('Collection created successfully!');
-  };
-
-  // Convert cartItems for display (flatten duplicates)
-  const cartItemsForCheckout = cartItems.flatMap((item) =>
-    Array(item.quantity).fill({ ...item, quantity: 1 })
-  );
-
   if (showLoading) {
     return <LoadingScreen onComplete={() => setShowLoading(false)} />;
   }
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-black text-white">
       <Navbar
         cartCount={cartItems.reduce((sum, item) => sum + item.quantity, 0)}
         onCartClick={() => setIsCartOpen(true)}
@@ -277,22 +268,14 @@ function App() {
 
       {currentView === 'contact' && <ContactPage onBack={handleBackToHome} />}
 
-      {/* {currentView === 'products' && (
+      {currentView === 'products' && (
         <ProductsPage
           onBack={handleBackToHome}
           onViewProduct={handleViewProduct}
           onAddToCart={handleAddToCart}
+          user={user}
         />
-      )} */}
-
-      {currentView === 'products' && (
-  <ProductsPage
-    onBack={handleBackToHome}
-    onViewProduct={handleViewProduct}
-    onAddToCart={handleAddToCart}
-    user={user}  // Add this line
-  />
-)}
+      )}
 
       {currentView === 'product-detail' && selectedProductSlug && (
         <ProductDetailPage
@@ -304,8 +287,9 @@ function App() {
 
       {currentView === 'checkout' && (
         <CheckoutPage
-          items={cartItemsForCheckout}
-         
+          items={cartItems.flatMap((item) =>
+            Array(item.quantity).fill({ ...item, quantity: 1 })
+          )}
           onOrderComplete={handleOrderComplete}
         />
       )}
@@ -314,9 +298,7 @@ function App() {
         <OrderConfirmation orderId={orderId} onBackToHome={handleBackToHome} />
       )}
 
-      {currentView === 'orders' && (
-        <UserOrdersPage onBack={handleBackToHome} />
-      )}
+      {currentView === 'orders' && <UserOrdersPage onBack={handleBackToHome} />}
 
       {currentView === 'admin-dashboard' && (
         <AdminDashboard onClose={handleBackToHome} />
@@ -340,14 +322,15 @@ function App() {
       <AdminProductForm
         isOpen={isAdminProductFormOpen}
         onClose={() => setIsAdminProductFormOpen(false)}
-        onSuccess={handleAdminProductSuccess}
       />
 
       <AdminCollectionForm
         isOpen={isAdminCollectionFormOpen}
         onClose={() => setIsAdminCollectionFormOpen(false)}
-        onSuccess={handleAdminCollectionSuccess}
       />
+
+      {/* Review Popup appears 30 seconds after login */}
+      {showReviewPopup && <ReviewPopup onClose={() => setShowReviewPopup(false)} />}
     </div>
   );
 }

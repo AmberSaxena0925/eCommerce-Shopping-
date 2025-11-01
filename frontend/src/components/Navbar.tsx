@@ -82,17 +82,17 @@ export default function Navbar({
             <button onClick={onProductsClick} className="text-zinc-400 hover:text-white transition-colors tracking-wide">
               PRODUCTS
             </button>
-            <a href="#about" className="text-zinc-400 hover:text-white transition-colors tracking-wide">
-              ABOUT
-            </a>
-            <button onClick={onContactClick} className="text-zinc-400 hover:text-white transition-colors tracking-wide">
-              CONTACT
-            </button>
             {user && onOrdersClick && (
               <button onClick={onOrdersClick} className="text-zinc-400 hover:text-white transition-colors tracking-wide">
                 ORDERS
               </button>
             )}
+            <button onClick={onContactClick} className="text-zinc-400 hover:text-white transition-colors tracking-wide">
+              CONTACT
+            </button>
+            <a href="#about" className="text-zinc-400 hover:text-white transition-colors tracking-wide">
+              ABOUT
+            </a>
           </div>
 
           <div className="flex items-center space-x-6">

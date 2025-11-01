@@ -40,8 +40,8 @@ export default function CollectionsPage() {
     <div className="relative overflow-hidden mb-10">
   <div className="animate-scroll-ltr whitespace-nowrap py-3 text-lg lg:text-2xl tracking-wider font-light text-white">
      ⭐ EVERY PEARL COMES WITH GUARANTEE CERTIFICATE 
-     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nb
-     sp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ⭐
+     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ⭐
       FREE DELIVERY ALL OVER INDIA &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
       &nbsp;&nbsp;
@@ -52,7 +52,7 @@ export default function CollectionsPage() {
     </div>
 
    <center>
-     <h1 className="text-4xl lg:text-5x4 font-light tracking-wide mb-8">
+     <h1 className="text-4xl lg:text-5x4 font-light tracking-wide mb-20">
      <b>EXPLORE THE COLLECTION OF PEARLS.</b>
    </h1>
      </center>
